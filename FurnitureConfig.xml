@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FurnitureVariables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<FilesWithBlocks>
+		<ManufacturersNames>
+			<string>Наш Двор</string>
+			<string>Игратекс</string>
+			<string>Аданат</string>
+			<string>Punto Group</string>
+			<string>Шелби</string>
+			<string>Kenguru pro</string>
+			<string>Стиль Сити Rus</string>
+			<string>МАФ маркет</string>
+			<string>Айра</string>
+			<string>ВегаГрупп</string>
+			<string>EKOBIN</string>
+			<string>КСИЛ</string>
+		</ManufacturersNames>
+		<FilePaths>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Наш Двор.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Игратекс.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Аданат.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Punto Group.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Шелби.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Kenguru pro.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Стиль Сити Rus.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_МАФ маркет.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_Айра.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_ВегаГрупп.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_EKOBIN.dwg</string>
+			<string>Q:\3. Шаблоны\Civil3D\Генплан\МАФ\ГП_МАФ_Блоки_КСИЛ.dwg</string>
+		</FilePaths>
+	</FilesWithBlocks>
+	<FurnitureLayerName>40_МАФ</FurnitureLayerName>
+	<FurnitureAnnotantionsStyle>
+		<LayerName>41_МАФ_подписи</LayerName>
+		<StyleName>МАФ</StyleName>
+		<BlockName>_TagCircle</BlockName>
+		<BlockAttributeName>НОМЕРЯРЛЫКА</BlockAttributeName>
+	</FurnitureAnnotantionsStyle>
+	<FurnitureTableStyle>
+		<Header>Ведомость МАФ.</Header>
+		<Layer>42_МАФ_Ведомости</Layer>
+		<CollumnWidths>
+			<int>10</int>
+			<int>30</int>
+			<int>50</int>
+			<int>30</int>
+			<int>20</int>
+			<int>15</int>
+			<int>30</int>
+		</CollumnWidths>
+		<CollumnNames>
+			<string>№</string>
+			<string>Условное обозначение</string>
+			<string>Наименование, производитель , артикул</string>
+			<string>Цвет изделия: RAL</string>
+			<string>Высота падения (мм)</string>
+			<string>Кол-во</string>
+			<string>Способ крепления</string>
+		</CollumnNames>
+	</FurnitureTableStyle>
+	<LightningTablesStyle>
+		<Layer>42_МАФ_Ведомости</Layer>
+		<Header>Ведомость осветительного оборудования.</Header>
+		<CollumnWidths>
+			<int>15</int>
+			<int>20</int>
+			<int>30</int>
+			<int>60</int>
+			<int>20</int>
+			<int>15</int>
+			<int>20</int>
+		</CollumnWidths>
+		<CollumnNames>
+			<string>№ Позиция на плане</string>
+			<string>Условное обозначение</string>
+			<string>MaterialCode</string>
+			<string>Наименование: вид оборудования, модель/артикул</string>
+			<string>Световая температура, К</string>
+			<string>RAL</string>
+			<string>Колличество, шт</string>
+		</CollumnNames>
+		<ThumbnailScale>2</ThumbnailScale>
+	</LightningTablesStyle>
+	<LightningFurnitureFilePath>Q:\3. Шаблоны\Civil3D\Генплан\Каталог блоков_Освещение\ГП_Освещение_Блоки.dwg</LightningFurnitureFilePath>
+	<LightningFurnitureBlocks>
+	    <FurnitureBlockPrefix>Осв</FurnitureBlockPrefix>
+	    <NetworkBlockPrefix>ЭН</NetworkBlockPrefix>
+	    <BlocksAttributes>
+		    <string>Световая_температура_К</string>
+		    <string>Цвет_изделия_RAL</string>
+		    <string>Поз</string>
+		    <string>Наименование</string>
+	    </BlocksAttributes>
+		<NetworkLayer>171_Опоры_ЭН</NetworkLayer>
+		<FurnitureLayer>44_МАФ_Освещение</FurnitureLayer>
+		<BlockNames>
+			<string>Осв_Г-образная_система_Тверь_TV_40-1_Saros_ALL.TMN.3.18.29.К.1_1.1.1</string>
+			<string>Осв_Г-образная_система_Тверь_TV50-1_Saros_ALL.TMN.3.18.29.К.2_1.1.2</string>
+			<string>Осв_Г-образная_система_Тверь_TV60-1_Saros_ALL.TMN.3.18.29.К.3_1.1.3</string>
+			<string>Осв_Г-образная_система_Тверь_TTV40M-1_Saros_ALL.TMN.3.18.29.К.4_1.1.4</string>
+			<string>Осв_Г-образная_система_Тверь_TV40M2_Saros_ALL.TMN.3.18.29.К.5_1.1.5</string>
+			<string>Осв_Г-образная_система_Тверь_TV60M-1_Saros_ALL.TMN.3.18.29.К.6_1.1.6</string>
+			<string>Осв_Г-образная_система_Тверь_TV_40-2_Saros_ALL.TMN.3.18.29.К.7_1.1.7</string>
+			<string>Осв_Г-образная_система_Тверь_TV50-2_Saros_ALL.TMN.3.18.29.К.8_1.1.8</string>
+			<string>Осв_Г-образная_система_Тверь_TV60-2_Saros_ALL.TMN.3.18.29.К.9_1.1.9</string>
+			<string>Осв_Г-образная_система_Тверь_TV40M2_Saros_ALL.TMN.3.18.29.К.10_1.1.10</string>
+			<string>Осв_Г-образная_система_Тверь_TV50M-2_Saros_ALL.TMN.3.18.29.К.11_1.1.11</string>
+			<string>Осв_Г-образная_система_Тверь_TV60M-2_Saros_ALL.TMN.3.18.29.К.12_1.1.12</string>
+			<string>Осв_Г-образная_система_Тверь_TV60-3_Saros_ALL.TMN.3.18.29.К.13_1.1.13</string>
+			<string>Осв_Г-образная_система_Тверь_TV60M-3_Saros_ALL.TMN.3.18.29.К.14_1.1.14</string>
+		</BlockNames>
+	</LightningFurnitureBlocks>
+</FurnitureVariables>

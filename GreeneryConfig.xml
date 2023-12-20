@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<GreeneryVariables>
+	<CityNames>
+		<string>Тюмень</string>
+	</CityNames>
+	<GreeneryItemsTablesStyle>
+		<Header>Ассортиментная ведомость озеленения. Штучные элементы.</Header>
+		<Layer>52_Озеленение_Ведомости</Layer>
+		<CollumnWidths>
+			<int>20</int>
+			<int>30</int>
+			<int>20</int>
+			<int>50</int>
+			<int>30</int>
+			<int>20</int>
+			<int>20</int>
+			<int>20</int>
+			<int>20</int>
+			<int>20</int>
+		</CollumnWidths>
+		<CollumnNames>
+			<string>№ позиция на плане</string>
+			<string>Условное обозначение</string>
+			<string>MaterialCode</string>
+			<string>Русское название/Латинское название</string>
+			<string>Высота растения, м</string>
+			<string>Обхват ствола, см</string>
+			<string>Диаметр кроны, м</string>
+			<string>Размер кома H*D, м</string>
+			<string>Размер посадочной ямы D*H, м</string>
+			<string>Колличество, шт</string>
+		</CollumnNames>
+		<ThumbnailScale>2.0</ThumbnailScale>
+	</GreeneryItemsTablesStyle>
+	<GreeneryAreasTablesStyle>
+		<Header>Ассортиментная ведомость озеленения. Площадные элементы.</Header>
+		<Layer>52_Озеленение_Ведомости</Layer>
+		<CollumnWidths>
+			<int>20</int>
+			<int>30</int>
+			<int>20</int>
+			<int>50</int>
+			<int>20</int>
+			<int>20</int>
+			<int>20</int>
+			<int>20</int>
+			<int>20</int>
+		</CollumnWidths>
+		<CollumnNames>
+			<string>№ позиция на плане</string>
+			<string>Условное обозначение</string>
+			<string>MaterialCode</string>
+			<string>Русское название/Латинское название</string>
+			<string>Параметры растения H*D, м</string>
+			<string>Размер кома H*D, м</string>
+			<string>Норма высадки, шт/м2</string>
+			<string>Площадь, м2</string>
+			<string>Колличество, шт</string>
+		</CollumnNames>
+		<ThumbnailScale>1.0</ThumbnailScale>
+	</GreeneryAreasTablesStyle>
+	<GreeneryLawnsTablesStyle>
+		<Layer>52_Озеленение_Ведомости</Layer>
+		<Header>Ассортиментная ведомость озеленения. Газоны.</Header>
+		<CollumnWidths>
+			<int>20</int>
+			<int>30</int>
+			<int>20</int>
+			<int>50</int>
+			<int>30</int>
+			<int>20</int>
+		</CollumnWidths>
+		<CollumnNames>
+			<string>№ позиция на плане</string>
+			<string>Условное обозначение</string>
+			<string>MaterialCode</string>
+			<string>Наименование</string>
+			<string>Состав травосмеси % / тип</string>
+			<string>Площадь, м2</string>
+		</CollumnNames>
+		<ThumbnailScale>1.0</ThumbnailScale>
+	</GreeneryLawnsTablesStyle>
+	<GreeneryMulchTablesStyle>
+		<Layer>52_Озеленение_Ведомости</Layer>
+		<Header>Ассортиментная ведомость озеленения. Сыпучие материалы.</Header>
+		<CollumnWidths>
+			<int>20</int>
+			<int>30</int>
+			<int>20</int>
+			<int>50</int>
+			<int>30</int>
+			<int>20</int>
+		</CollumnWidths>
+		<CollumnNames>
+			<string>№ позиция на плане</string>
+			<string>Условное обозначение</string>
+			<string>MaterialCode</string>
+			<string>Наименование</string>
+			<string>Характеристики покрытия</string>
+			<string>Площадь, м2</string>
+		</CollumnNames>
+		<ThumbnailScale>1.0</ThumbnailScale>
+	</GreeneryMulchTablesStyle>
+</GreeneryVariables>
