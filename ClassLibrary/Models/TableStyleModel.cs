@@ -13,6 +13,8 @@ internal class TableStyleModel
     public string DataStyleName { get; set; } = "";
     public int DataRowsHeight { get; set; } = 8;
     public TableRangeModel[] DataMergeRanges { get; set; } = [];
+    public CellStyleModel[] CellStyleModels { get; set; } = [];
+    public VisualStyleModel[] VisualStyleModel { get; set; } = [];
     public int[] CollumnWidths { get; set; } = [];
     public int[] BlockCollumnsInData { get; set; } = [];
     public double[] BlocksScale { get; set; } = [];

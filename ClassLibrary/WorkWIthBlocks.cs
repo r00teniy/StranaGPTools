@@ -3,7 +3,7 @@
 namespace ClassLibrary;
 internal class WorkWithBlocks(Transaction transaction)
 {
-    internal List<Dictionary<string, string>> GetAllAttributesFromBlockReferences(List<BlockReference> blockReferenceList)
+    public List<Dictionary<string, string>> GetAllAttributesFromBlockReferences(List<BlockReference> blockReferenceList)
     {
         var output = new List<Dictionary<string, string>>();
         for (var i = 0; i < blockReferenceList.Count; i++)
@@ -22,7 +22,25 @@ internal class WorkWithBlocks(Transaction transaction)
         }
         return output;
     }
-    internal void SetBlockAttributes(BlockReference block, string[] attrNames, string[] attrValues)
+    public List<Dictionary<string, string>> GetAllParametersFromBlockReferences(List<BlockReference> blockReferenceList)
+    {
+        List<Dictionary<string, string>> output = new List<Dictionary<string, string>>();
+        foreach (var blockReference in blockReferenceList)
+        {
+            var dict = new Dictionary<string, string>();
+            var propertyCollection = blockReference.DynamicBlockReferencePropertyCollection;
+            foreach (DynamicBlockReferenceProperty property in propertyCollection)
+            {
+                if (!dict.ContainsKey(property.PropertyName))
+                {
+                    dict.Add(property.PropertyName, property.Value.ToString());
+                }
+            }
+            output.Add(dict);
+        }
+        return output;
+    }
+    public void SetBlockAttributes(BlockReference block, string[] attrNames, string[] attrValues)
     {
         foreach (ObjectId id in block.AttributeCollection)
         {

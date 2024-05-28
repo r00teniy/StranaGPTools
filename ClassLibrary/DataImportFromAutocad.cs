@@ -1,11 +1,13 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+﻿using System.IO;
+
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 
 using ClassLibrary.Models;
 
 namespace ClassLibrary;
-internal class DataImportFromAutocad(Transaction transaction)
+public class DataImportFromAutocad(Transaction? transaction)
 {
     private readonly Database db = Application.DocumentManager.MdiActiveDocument.Database;
 
@@ -111,7 +113,7 @@ internal class DataImportFromAutocad(Transaction transaction)
                 if (item.ObjectClass.IsDerivedFrom(RXObject.GetClass(typeof(T))))
                 {
                     T entity = (T)transaction.GetObject(item, OpenMode.ForRead);
-                    string layerToCHeck = xrefName != null ? xrefName + "|" + layer : layer;
+                    string layerToCHeck = xrefName != "" ? xrefName + "|" + layer : layer;
                     if (exactLayerName)
                     {
                         if (entity.Layer == layerToCHeck)
@@ -137,30 +139,28 @@ internal class DataImportFromAutocad(Transaction transaction)
         using (Database openDb = new(false, true))
         {
             openDb.ReadDwgFile(filePath, System.IO.FileShare.ReadWrite, true, "");
-            using (Transaction tr = openDb.TransactionManager.StartTransaction())
+            using Transaction tr = openDb.TransactionManager.StartTransaction();
+            LayerTable lt = (LayerTable)tr.GetObject(openDb.LayerTableId, OpenMode.ForRead);
+            LayerTableRecord layer;
+            foreach (ObjectId item in lt)
             {
-                LayerTable lt = (LayerTable)tr.GetObject(openDb.LayerTableId, OpenMode.ForRead);
-                LayerTableRecord layer;
-                foreach (ObjectId item in lt)
+                layer = (LayerTableRecord)tr.GetObject(item, OpenMode.ForWrite);
+                if (startsWith)
                 {
-                    layer = (LayerTableRecord)tr.GetObject(item, OpenMode.ForWrite);
-                    if (startsWith)
+                    if (layer.Name.StartsWith(textLayersContains))
                     {
-                        if (layer.Name.StartsWith(textLayersContains))
-                        {
-                            output.Add(layer.Name);
-                        }
-                    }
-                    else
-                    {
-                        if (layer.Name.Contains(textLayersContains))
-                        {
-                            output.Add(layer.Name);
-                        }
+                        output.Add(layer.Name);
                     }
                 }
-                tr.Commit();
+                else
+                {
+                    if (layer.Name.Contains(textLayersContains))
+                    {
+                        output.Add(layer.Name);
+                    }
+                }
             }
+            tr.Commit();
         }
         return output;
     }
@@ -210,6 +210,8 @@ internal class DataImportFromAutocad(Transaction transaction)
     }
     internal List<string> GetXRefList()
     {
+        Document doc = Application.DocumentManager.MdiActiveDocument;
+        Database db = doc.Database;
         List<string> output = new();
         XrefGraph XrGraph = db.GetHostDwgXrefGraph(false);
         for (int i = 1; i < XrGraph.NumNodes; i++)
@@ -225,21 +227,19 @@ internal class DataImportFromAutocad(Transaction transaction)
         using (Database openDb = new(false, true))
         {
             openDb.ReadDwgFile(filePath, FileShare.ReadWrite, true, "");
-            using (Transaction tr = openDb.TransactionManager.StartTransaction())
+            using Transaction tr = openDb.TransactionManager.StartTransaction();
+            BlockTable bt = (BlockTable)tr.GetObject(openDb.BlockTableId, OpenMode.ForRead);
+            foreach (ObjectId objId in bt)
             {
-                BlockTable bt = (BlockTable)tr.GetObject(openDb.BlockTableId, OpenMode.ForRead);
-                foreach (ObjectId objId in bt)
-                {
-                    BlockTableRecord btr = (BlockTableRecord)objId.GetObject(OpenMode.ForRead);
+                BlockTableRecord btr = (BlockTableRecord)objId.GetObject(OpenMode.ForRead);
 
-                    if (btr.IsLayout || btr.Name.StartsWith('*') || (blockStartsWith != "" && !btr.Name.StartsWith(blockStartsWith)))
-                    {
-                        continue;
-                    }
-                    output.Add(btr.Name);
+                if (btr.IsLayout || btr.Name.StartsWith("*") || (blockStartsWith != "" && !btr.Name.StartsWith(blockStartsWith)))
+                {
+                    continue;
                 }
-                tr.Commit();
+                output.Add(btr.Name);
             }
+            tr.Commit();
         }
         return output;
     }
@@ -250,53 +250,51 @@ internal class DataImportFromAutocad(Transaction transaction)
         using (Database openDb = new(false, true))
         {
             openDb.ReadDwgFile(filePath, FileShare.ReadWrite, true, "");
-            using (Transaction ftr = openDb.TransactionManager.StartTransaction())
+            using Transaction ftr = openDb.TransactionManager.StartTransaction();
+            BlockTable fbt = (BlockTable)ftr.GetObject(openDb.BlockTableId, OpenMode.ForRead);
+            BlockTableRecord fbtr = (BlockTableRecord)ftr.GetObject(fbt[BlockTableRecord.ModelSpace], OpenMode.ForRead);
+            LayerTable lt = (LayerTable)ftr.GetObject(openDb.LayerTableId, OpenMode.ForRead);
+            if (lt.Has(hatchLayer))
             {
-                BlockTable fbt = (BlockTable)ftr.GetObject(openDb.BlockTableId, OpenMode.ForRead);
-                BlockTableRecord fbtr = (BlockTableRecord)ftr.GetObject(fbt[BlockTableRecord.ModelSpace], OpenMode.ForRead);
-                LayerTable lt = (LayerTable)ftr.GetObject(openDb.LayerTableId, OpenMode.ForRead);
-                if (lt.Has(hatchLayer))
+                bool foundHatch = false;
+                foreach (ObjectId item in fbtr)
                 {
-                    bool foundHatch = false;
-                    foreach (ObjectId item in fbtr)
+                    Entity entity = (Entity)ftr.GetObject(item, OpenMode.ForRead);
+                    if (entity is Hatch hatch && entity.Layer == hatchLayer)
                     {
-                        Entity entity = (Entity)ftr.GetObject(item, OpenMode.ForRead);
-                        if (entity is Hatch hatch && entity.Layer == hatchLayer)
-                        {
-                            hatchStyleModel.PatternScale = hatch.PatternScale;
-                            hatchStyleModel.PatternName = hatch.PatternName;
-                            hatchStyleModel.PatternAngle = hatch.PatternAngle;
-                            hatchStyleModel.BackgroundColor = hatch.BackgroundColor;
-                            hatchStyleModel.PatternColor = hatch.Color;
-                            hatchStyleModel.Transparency = hatch.Transparency;
-                            hatchStyleModel.LayerName = hatchLayer;
-                            foundHatch = true;
-                            break;
-                        }
-                    }
-                    LayerTableRecord layer;
-                    foreach (var lay in lt)
-                    {
-                        layer = (LayerTableRecord)ftr.GetObject(lay, OpenMode.ForRead);
-                        if (layer.Name == hatchLayer)
-                        {
-                            layerModel.LayerName = layer.Name;
-                            layerModel.LayerLineWeight = layer.LineWeight;
-                            layerModel.LayerColor = layer.Color;
-                            layerModel.IsLayerPlottable = layer.IsPlottable;
-                            layerModel.LayerTransparency = layer.Transparency;
-                            break;
-                        }
-                    }
-                    if (!foundHatch)
-                    {
-                        return ($"Произошла ошибка, на слое {hatchLayer} нет штриховки", hatchStyleModel, layerModel);
+                        hatchStyleModel.PatternScale = hatch.PatternScale;
+                        hatchStyleModel.PatternName = hatch.PatternName;
+                        hatchStyleModel.PatternAngle = hatch.PatternAngle;
+                        hatchStyleModel.BackgroundColor = hatch.BackgroundColor;
+                        hatchStyleModel.PatternColor = hatch.Color;
+                        hatchStyleModel.Transparency = hatch.Transparency;
+                        hatchStyleModel.LayerName = hatchLayer;
+                        foundHatch = true;
+                        break;
                     }
                 }
-                else
+                LayerTableRecord layer;
+                foreach (var lay in lt)
                 {
-                    return ($"Произошла ошибка, в файле нет слоя {hatchLayer}", hatchStyleModel, layerModel);
+                    layer = (LayerTableRecord)ftr.GetObject(lay, OpenMode.ForRead);
+                    if (layer.Name == hatchLayer)
+                    {
+                        layerModel.LayerName = layer.Name;
+                        layerModel.LayerLineWeight = layer.LineWeight;
+                        layerModel.LayerColor = layer.Color;
+                        layerModel.IsLayerPlottable = layer.IsPlottable;
+                        layerModel.LayerTransparency = layer.Transparency;
+                        break;
+                    }
                 }
+                if (!foundHatch)
+                {
+                    return ($"Произошла ошибка, на слое {hatchLayer} нет штриховки", hatchStyleModel, layerModel);
+                }
+            }
+            else
+            {
+                return ($"Произошла ошибка, в файле нет слоя {hatchLayer}", hatchStyleModel, layerModel);
             }
         }
         return ("ok", hatchStyleModel, layerModel);
@@ -393,4 +391,10 @@ internal class DataImportFromAutocad(Transaction transaction)
             return "ok";
         }
     }
+    internal T? GetObjectOfTypeTByObjectId<T>(ObjectId objectId) where T : Entity
+    {
+        return transaction.GetObject(objectId, OpenMode.ForRead) as T;
+    }
+
+
 }

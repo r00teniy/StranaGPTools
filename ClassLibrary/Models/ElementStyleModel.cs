@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ClassLibrary.Models;
-internal class ElementStyle
+internal class ElementStyleModel
 {
     public string ElementLayer { get; set; } = "";
     public Color ElementColor { get; set; } = Color.FromColorIndex(ColorMethod.ByAci, 256);

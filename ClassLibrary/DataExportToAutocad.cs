@@ -1,23 +1,26 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 
 using ClassLibrary.Models;
 namespace ClassLibrary;
-internal class DataExportToAutocad
+public class DataExportToAutocad
 {
     private readonly Database db = Application.DocumentManager.MdiActiveDocument.Database;
     private readonly Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
     private readonly Transaction _transaction;
     private readonly BlockTable _blockTable;
+    private readonly UserInput _userInput;
 
     public DataExportToAutocad(Transaction transaction)
     {
         _transaction = transaction;
-        _blockTable = (_transaction.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable)!;
+        _blockTable = (BlockTable)_transaction.GetObject(db.BlockTableId, OpenMode.ForRead);
+        _userInput = new();
     }
-    internal string CreateTempLines(List<(Point3d, Point3d)> pointsList, ElementStyle style)
+    internal string CreateTempLines(List<(Point3d, Point3d)> pointsList, ElementStyleModel style)
     {
         var bT = (BlockTable)_transaction.GetObject(db.BlockTableId, OpenMode.ForRead);
         BlockTableRecord btr = (BlockTableRecord)_transaction.GetObject(bT[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
@@ -26,18 +29,16 @@ internal class DataExportToAutocad
             foreach (var points in pointsList)
             {
                 var (ptStart, ptEnd) = points;
-                using (Line acLine = new())
-                {
-                    acLine.Color = style.ElementColor;
-                    acLine.Layer = style.ElementLayer;
-                    acLine.LineWeight = style.ElementLineWeight;
-                    acLine.Transparency = style.ElementTransparency;
-                    acLine.StartPoint = ptStart;
-                    acLine.EndPoint = ptEnd;
-                    // Add the new object to the block table record and the transaction
-                    btr.AppendEntity(acLine);
-                    _transaction.AddNewlyCreatedDBObject(acLine, true);
-                }
+                using Line acLine = new();
+                acLine.Color = style.ElementColor;
+                acLine.Layer = style.ElementLayer;
+                acLine.LineWeight = style.ElementLineWeight;
+                acLine.Transparency = style.ElementTransparency;
+                acLine.StartPoint = ptStart;
+                acLine.EndPoint = ptEnd;
+                // Add the new object to the block table record and the transaction
+                btr.AppendEntity(acLine);
+                _transaction.AddNewlyCreatedDBObject(acLine, true);
             }
             return "ok";
         }
@@ -46,7 +47,7 @@ internal class DataExportToAutocad
             return e.Message;
         }
     }
-    internal string CreateMleadersWithText(List<string> texts, List<Point3d> points, MleaderStyle style)
+    internal string CreateMleadersWithText(List<string> texts, List<Point3d> points, MleaderStyleModel style)
     {
         BlockTableRecord btr = (BlockTableRecord)_transaction.GetObject(_blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
         //creating Mleaders
@@ -101,7 +102,7 @@ internal class DataExportToAutocad
         }
         return "ok";
     }
-    internal string CreateMleaderWithBlockForGroupOfobjects(List<List<Point3d>> pointList, MleaderStyle style, List<string[]> data)
+    internal string CreateMleaderWithBlockForGroupOfobjects(List<List<Point3d>> pointList, MleaderStyleModel style, List<string[]> data)
     {
         BlockTableRecord btr = (BlockTableRecord)_transaction.GetObject(_blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
         //Getting rotation of current UCS to pass it to block
@@ -216,43 +217,39 @@ internal class DataExportToAutocad
         try
         {
             ObjectIdCollection block = new();
-            using (Database OpenDb = new Database(false, true))
+            using Database OpenDb = new Database(false, true);
+            if (!_blockTable.Has(blockname))
             {
-                if (!_blockTable.Has(blockname))
+                OpenDb.ReadDwgFile(filePath, System.IO.FileShare.ReadWrite, true, "");
+                using (Transaction ftr = OpenDb.TransactionManager.StartTransaction())
                 {
-                    OpenDb.ReadDwgFile(filePath, System.IO.FileShare.ReadWrite, true, "");
-                    using (Transaction ftr = OpenDb.TransactionManager.StartTransaction())
+                    var fbt = (BlockTable)ftr.GetObject(OpenDb.BlockTableId, OpenMode.ForRead);
+                    if (fbt.Has(blockname))
                     {
-                        var fbt = (BlockTable)ftr.GetObject(OpenDb.BlockTableId, OpenMode.ForRead);
-                        if (fbt.Has(blockname))
-                        {
-                            block.Add(fbt[blockname]);
-                        }
-                        ftr.Commit();
+                        block.Add(fbt[blockname]);
                     }
-                    if (block.Count != 0)
-                    {
-                        IdMapping iMap = new();
-                        db.WblockCloneObjects(block, db.BlockTableId, iMap, DuplicateRecordCloning.Ignore, false);
-                    }
+                    ftr.Commit();
                 }
-                var pt = _userInput.GetInsertionPoint();
-                var blockId = _blockTable[blockname];
-                CheckIfLayerExistAndCreateIfNot(model);
-                if (pt != null)
+                if (block.Count != 0)
                 {
-                    using (BlockReference newBlock = new((Point3d)pt, blockId))
-                    {
-                        var btr = (_transaction.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord)!;
-                        newBlock.Layer = model.LayerName;
-                        btr.AppendEntity(newBlock);
-                        _transaction.AddNewlyCreatedDBObject(newBlock, true);
-                    }
+                    IdMapping iMap = new();
+                    db.WblockCloneObjects(block, db.BlockTableId, iMap, DuplicateRecordCloning.Ignore, false);
                 }
-                else
-                {
-                    return "Не была выбрана точка вставки.";
-                }
+            }
+            var pt = _userInput.GetInsertionPoint();
+            var blockId = _blockTable[blockname];
+            CheckIfLayerExistAndCreateIfNot(model);
+            if (pt != null)
+            {
+                using BlockReference newBlock = new((Point3d)pt, blockId);
+                var btr = (_transaction.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord)!;
+                newBlock.Layer = model.LayerName;
+                btr.AppendEntity(newBlock);
+                _transaction.AddNewlyCreatedDBObject(newBlock, true);
+            }
+            else
+            {
+                return "Не была выбрана точка вставки.";
             }
             return "ok";
         }
@@ -299,14 +296,14 @@ internal class DataExportToAutocad
         hat.EvaluateHatch(true);
         return "ok";
     }
-    internal string CreateTableInDrawing(Transaction tr, Point3d pt, List<string>[] data, List<double[]> blockScale, TableStyleModel style)
+    internal string CreateTableInDrawing(Point3d pt, List<string[]> data, List<double[]> blockScale, TableStyleModel style)
     {
-        var btr = (tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite, false) as BlockTableRecord)!;
+        var btr = (_transaction.GetObject(db.CurrentSpaceId, OpenMode.ForWrite, false) as BlockTableRecord)!;
         ObjectId tbSt = new();
-        DBDictionary tsd = (DBDictionary)tr.GetObject(db.TableStyleDictionaryId, OpenMode.ForRead);
+        DBDictionary tsd = (DBDictionary)_transaction.GetObject(db.TableStyleDictionaryId, OpenMode.ForRead);
         foreach (DBDictionaryEntry entry in tsd)
         {
-            var tStyle = (TableStyle)tr.GetObject(entry.Value, OpenMode.ForRead);
+            var tStyle = (TableStyle)_transaction.GetObject(entry.Value, OpenMode.ForRead);
             if (tStyle.Name == style.StyleName)
             { tbSt = entry.Value; }
         }
@@ -323,7 +320,7 @@ internal class DataExportToAutocad
         {
             tb.Layer = style.Layer;
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             return $"В файле отсутствует нужный слой для таблиц {style.Layer}, необходимо работать в шаблоне. Таблица создана на текущем слое";
         }
@@ -337,21 +334,31 @@ internal class DataExportToAutocad
         {
             tb.InsertRows(currentRow, style.HeaderRowsHeight[i], 1);
             tb.Rows[currentRow].Style = style.HeaderStyleName;
-            tb.Cells[currentRow, 0].TextString = style.HeaderCollumnNames[i][0];
-            for (int j = 1; j < style.HeaderCollumnNames[i].Length; i++)
+            currentRow++;
+        }
+        currentRow = 1;
+        for (int j = 1; j < style.HeaderCollumnNames[0].Length; j++)
+        {
+            tb.InsertColumns(j, style.CollumnWidths[j], 1);
+            tb.Cells[currentRow, j].Alignment = CellAlignment.MiddleCenter;
+
+        }
+        for (int i = 0; i < style.HeaderRowsCount; i++)
+        {
+
+            tb.Cells[currentRow, 0].TextString = style.HeaderCollumnNames[i][0] == null ? "" : style.HeaderCollumnNames[i][0];
+            for (int j = 1; j < style.HeaderCollumnNames[i].Length; j++)
             {
-                tb.InsertColumns(j, style.CollumnWidths[j], 1);
-                tb.Cells[currentRow, j].Alignment = CellAlignment.MiddleCenter;
-                tb.Cells[currentRow, j].TextString = style.HeaderCollumnNames[i][j];
+                tb.Cells[currentRow, j].TextString = style.HeaderCollumnNames[i][j] == null ? "" : style.HeaderCollumnNames[i][j];
             }
             currentRow++;
         }
         MergeCellsAndSetAlignment(style.HeaderMergeRanges, tb);
         //Filling data
-        for (int i = 0; i < data.Length; i++)
+        for (int i = 0; i < data.Count(); i++)
         {
             tb.InsertRows(currentRow, style.DataRowsHeight, 1);
-            for (int j = 0; j < data[i].Count; j++)
+            for (int j = 0; j < data[i].Length; j++)
             {
                 if (style.BlockCollumnsInData.Contains(j))
                 {
@@ -367,26 +374,55 @@ internal class DataExportToAutocad
                 else
                 {
                     tb.Cells[currentRow, j].Alignment = CellAlignment.MiddleCenter;
-                    tb.Cells[currentRow, j].TextString = data[i][j];
+                    tb.Cells[currentRow, j].TextString = data[i][j] == null || data[i][j] == "0" || data[i][j] == "" ? "-" : data[i][j];
                 }
             }
+            currentRow++;
         }
         MergeCellsAndSetAlignment(style.DataMergeRanges, tb);
-
+        SetCellStyle(style.CellStyleModels, tb);
+        SetVisualStyles(style.VisualStyleModel, tb);
         tb.GenerateLayout();
         btr.AppendEntity(tb);
-        tr.AddNewlyCreatedDBObject(tb, true);
+        _transaction.AddNewlyCreatedDBObject(tb, true);
         return "ok";
     }
-
     //SupportMethods
-    private static void MergeCellsAndSetAlignment(TableRangeModel[] ranges, Table tb)
+    private void SetVisualStyles(VisualStyleModel[] styles, Table tb)
+    {
+        foreach (var item in styles)
+        {
+            var range = CellRange.Create(tb, item.FirstRow, item.FirstCollumn, item.SecondRow, item.SecondCollumn);
+            if (item.SetRightBorder)
+            {
+                range.Borders.Right.LineWeight = item.BorderLineWeight;
+            }
+            if (item.SetBottomBorder)
+            {
+                range.Borders.Bottom.LineWeight = item.BorderLineWeight;
+            }
+            if (item.BackgrounColor != -1)
+            {
+                range.BackgroundColor = Color.FromColorIndex(ColorMethod.ByAci, item.BackgrounColor);
+            }
+        }
+    }
+    private void SetCellStyle(CellStyleModel[] styles, Table tb)
+    {
+        foreach (var style in styles)
+        {
+            tb.Cells[style.Row, style.Collumn].Alignment = style.Alignment;
+            tb.Cells[style.Row, style.Collumn].Contents[0].Rotation = style.RotationAngle;
+        }
+    }
+    private void MergeCellsAndSetAlignment(TableRangeModel[] ranges, Table tb)
     {
         foreach (var item in ranges)
         {
             var range = CellRange.Create(tb, item.FirstRow, item.FirstCollumn, item.SecondRow, item.SecondCollumn);
             tb.MergeCells(range);
             range.Alignment = item.Alignment;
+            tb.Cells[item.FirstRow, item.FirstCollumn].Contents[0].Rotation = item.RotationAngle;
         }
     }
 }

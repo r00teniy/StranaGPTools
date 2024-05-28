@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ArrayOfCityModel xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<CityModel>
+		<Name>Тюмень</Name>
+		<SquareMetersPerPerson>35</SquareMetersPerPerson>
+		<LongResidentialParkingFormula>0.85*п1_Кол_во_квартир_шт*0.9</LongResidentialParkingFormula>
+		<ShortResidentialParkingFormula>IIF(Постоянных_на_участке_шт&gt;(Постоянных_мм_шт*0.4),Постоянных_мм_шт*0.125,Постоянных_мм_шт*0.25)</ShortResidentialParkingFormula>
+		<NonResidentialParkingFormulas>
+			<string>2</string>
+			<string>2</string>
+			<string>2</string>
+			<string>2</string>
+			<string>2</string>
+		</NonResidentialParkingFormulas>
+		<BuiltInParkingFormulas>
+			<string>(п1_Кол_сотрудников_шт+п1_Кол_учащихся_шт)/12</string>
+			<string>2</string>
+			<string>2</string>
+			<string>2</string>
+			<string>2</string>
+		</BuiltInParkingFormulas>
+		<DisabledResidentialLongFormula>0</DisabledResidentialLongFormula>
+		<DisabledResidentialShortFormula>Гостевых_мм_шт/10</DisabledResidentialShortFormula>
+		<DisabledCommercialShortFormula>Временных_мм_шт/10</DisabledCommercialShortFormula>
+		<DisabledBigResidentialLongFormula>0</DisabledBigResidentialLongFormula>
+		<DisabledBigResidentialShortFormula>Гостевых_мм_шт/20</DisabledBigResidentialShortFormula>
+		<DisabledBigCommercialShortFormula>Временных_мм_шт/20</DisabledBigCommercialShortFormula>
+		<ElecticResidentialLongFormula>1</ElecticResidentialLongFormula>
+		<ElecticResidentialShortFormula>1</ElecticResidentialShortFormula>
+		<ElecticCommercialShortFormula>2</ElecticCommercialShortFormula>
+	</CityModel>
+</ArrayOfCityModel>

@@ -3,7 +3,7 @@ using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ClassLibrary.Models;
-internal class MleaderStyle
+internal class MleaderStyleModel
 {
     public string MLeaderLayer { get; set; } = "";
     public Color MLeaderColor { get; set; } = Color.FromColorIndex(ColorMethod.ByAci, 256);
