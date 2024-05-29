@@ -27,4 +27,5 @@ public class ParkingSettings
     [XmlArrayItem("ParameterArray")]
     public List<string[]> BuiltInParameterNames { get; set; } = [];
     public string[] TextToReplace { get; set; } = [];
+    public string ParkingBlocksLayer { get; set; } = "";
 }

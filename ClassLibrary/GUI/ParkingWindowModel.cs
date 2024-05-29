@@ -14,7 +14,6 @@ public partial class ParkingWindowModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreateParkingTableClickCommand))]
     public int _selectedCityId;
-    public List<string> XRefs { get; set; }
     [ObservableProperty]
     public int _selectedXRef;
     private ParkingSettings _settings;
@@ -25,8 +24,6 @@ public partial class ParkingWindowModel : ObservableObject
         _settings = SettingsStorage.ReadParkingSettingsFromXML();
         _cities = SettingsStorage.ReadCitySettingsFromXML();
         CityNames = _cities.Select(x => x.Name).ToList();
-        var dataImport = new DataImportFromAutocad(null);
-        XRefs = dataImport.GetXRefList();
         _window = window;
     }
 
@@ -48,5 +45,29 @@ public partial class ParkingWindowModel : ObservableObject
         if (SelectedCityId >= 0)
             return true;
         return false;
+    }
+    [RelayCommand]
+    public void RecolorParkingBlocksClick()
+    {
+        _window.Hide();
+        var wwpb = new WorkWithParkingBlocks();
+        var result = wwpb.RecolorParkingBlocksInCurrentFile(_settings);
+        if (result != "Ok")
+        {
+            MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
+        }
+        _window.Show();
+    }
+    [RelayCommand]
+    public void RecolorAllParkingBlocksClick()
+    {
+        _window.Hide();
+        var wwpb = new WorkWithParkingBlocks();
+        var result = wwpb.RecolorAllParkingBlocksIncludingXRefs(_settings);
+        if (result != "Ok")
+        {
+            MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
+        }
+        _window.Show();
     }
 }

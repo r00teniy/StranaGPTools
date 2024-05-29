@@ -14,6 +14,7 @@ public class ParkingCalculations
     private DataImportFromAutocad? _dataImport;
     private DataExportToAutocad? _dataExport;
     private WorkWithBlocks? _workWithBlocks;
+    private UserInput _userInput;
     private readonly ParkingSettings _settings;
     private readonly CityModel _city;
     private readonly WorkWithPolygons _workWithPolygons;
@@ -23,6 +24,7 @@ public class ParkingCalculations
         _settings = settings;
         _city = city;
         _workWithPolygons = new();
+        _userInput = new UserInput();
     }
 
     private List<PlotBorderModel> Plots { get; set; } = [];
@@ -83,7 +85,7 @@ public class ParkingCalculations
     {
         try
         {
-            var blocks = _dataImport.GetAllElementsOfTypeInDrawing<BlockReference>("", true);
+            var blocks = _dataImport!.GetAllElementsOfTypeInDrawing<BlockReference>("", true);
             List<BlockReference> brList = [];
             List<string[]> attList = [];
             foreach (var br in blocks)
@@ -564,8 +566,17 @@ public class ParkingCalculations
 
                 TableStyleModel style = CreateTableStyleForParkingTable(linesForTable);
 
+                var point = _userInput.GetInsertionPoint();
 
-                _dataExport.CreateTableInDrawing(new Point3d(0, 0, 0), linesForTable, new List<double[]>(), style);
+                if (point != null)
+                {
+                    _dataExport.CreateTableInDrawing((Point3d)point, linesForTable, new List<double[]>(), style);
+                }
+                else
+                {
+                    return "Проблема при получении точки вставки";
+                }
+
                 tr.Commit();
                 return "Ok";
             }

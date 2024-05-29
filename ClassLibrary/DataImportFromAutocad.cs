@@ -133,6 +133,36 @@ public class DataImportFromAutocad(Transaction? transaction)
         }
         return output;
     }
+    internal List<T> GetAllElementsOfTypeOnLayerInDatabase<T>(string layer, Transaction tr, Database database, bool exactLayerName = true) where T : Entity
+    {
+        List<T> output = [];
+        List<XrefGraphNode> xrefList = [];
+        List<BlockTableRecord> btrList = [];
+        BlockTable bT = (BlockTable)tr.GetObject(database.BlockTableId, OpenMode.ForRead);
+        BlockTableRecord btr = (BlockTableRecord)tr.GetObject(bT[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
+        foreach (ObjectId item in btr)
+        {
+            if (item.ObjectClass.IsDerivedFrom(RXObject.GetClass(typeof(T))))
+            {
+                T entity = (T)tr.GetObject(item, OpenMode.ForRead);
+                if (exactLayerName)
+                {
+                    if (entity.Layer == layer)
+                    {
+                        output.Add(entity);
+                    }
+                }
+                else
+                {
+                    if (entity.Layer.Contains(layer))
+                    {
+                        output.Add(entity);
+                    }
+                }
+            }
+        }
+        return output;
+    }
     internal List<string> GetAllLayerNamesContainingStringFromFile(string textLayersContains, string filePath, bool startsWith = false)
     {
         List<string> output = [];
@@ -391,10 +421,13 @@ public class DataImportFromAutocad(Transaction? transaction)
             return "ok";
         }
     }
-    internal T? GetObjectOfTypeTByObjectId<T>(ObjectId objectId) where T : Entity
+    internal T? GetObjectOfTypeTByObjectId<T>(ObjectId objectId, Transaction? tr = null) where T : Entity
     {
-        return transaction.GetObject(objectId, OpenMode.ForRead) as T;
+        if (tr != null)
+            return tr.GetObject(objectId, OpenMode.ForRead) as T;
+        return transaction!.GetObject(objectId, OpenMode.ForRead) as T;
     }
+
 
 
 }

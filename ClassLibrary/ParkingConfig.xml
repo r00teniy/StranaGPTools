@@ -4,6 +4,7 @@
 	<PlotsBorderLayer>11_Граница_ЗУ_КН_</PlotsBorderLayer>
 	<StageBorderLayer>13_Граница_</StageBorderLayer>
 	<BuildingBlocksLayer>20_Блоки_КГП</BuildingBlocksLayer>
+	<ParkingBlocksLayer>72_Парк._Машиноместо</ParkingBlocksLayer>
 	<ParkingBlockPararmArray>
 		<string>Размер</string>
 		<string>Тип</string>

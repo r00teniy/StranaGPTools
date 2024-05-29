@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClassLibrary.GUI"
+        d:DataContext="{d:DesignInstance Type=local:ParkingWindowModel}"
         mc:Ignorable="d"
            Title="Работа с парковками" FontSize="18" Height="300" Width="600" Topmost="True" WindowStartupLocation="CenterScreen">
     <Grid>
@@ -36,16 +37,36 @@
             Grid.Column="1"
             Content="Создать таблицу парковок"
             Command="{Binding CreateParkingTableClickCommand}"/>
+        <!-- Row 2-->
+        <Label Content="Нажимать находясь в основе"
+               Grid.Row="2"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Center"/>
+        <Button Margin="5,5,5,5"
+            Grid.Row="2"
+            Grid.Column="1"
+            Content="Покрасить парковки в файле"
+            Command="{Binding RecolorParkingBlocksClickCommand}"/>
+        <!-- Row 3-->
+        <Label Content="Нажимать находясь в файле КГП"
+            Grid.Row="3"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"/>
+        <Button Margin="5,5,5,5"
+            Grid.Row="3"
+            Grid.Column="1"
+            Content="Покрасить парковоки в ссылках"
+            Command="{Binding RecolorAllParkingBlocksClickCommand}"/>
         <!-- Row 5-->
         <Button x:Name="InstructionButton"
-    Content="Инструкция"
-    Grid.Row="5"
-    Margin="5,5,5,5" Click="InstructionButton_Click"/>
+            Content="Инструкция"
+            Grid.Row="5"
+            Margin="5,5,5,5" Click="InstructionButton_Click"/>
         <Button x:Name="CloseButton"
-    Content="Закрыть"
-    Grid.Row="5"
-    Grid.Column="1"
-    Margin="5,5,5,5" 
-    Click="CloseButton_Click"/>
+            Content="Закрыть"
+            Grid.Row="5"
+            Grid.Column="1"
+            Margin="5,5,5,5" 
+            Click="CloseButton_Click"/>
     </Grid>
 </Window>
