@@ -42,19 +42,27 @@ public class ParkingCalculations
             var plotPolylines = _dataImport.GetAllElementsOfTypeOnLayer<Polyline>(_settings.PlotsBorderLayer, false, "", true);
             if (plotPolylines.Count == 0)
             {
-                return "No plot borders found";
+                return "Не найдены границы участков";
             }
             var plotBorders = plotPolylines.GroupBy(x => x.Layer);
             foreach (var plotBorder in plotBorders)
             {
                 List<Polyline> pLines = [.. plotBorder];
-                var region = _workWithPolygons.CreateMPolygonFromPolylines(pLines);
+                MPolygon region;
+                try
+                {
+                    region = _workWithPolygons.CreateMPolygonFromPolylines(pLines);
+                }
+                catch (Exception e)
+                {
+                    return $"Пробема с границами участка, необходимо проверить их на замкнутость и самопересечение " + e.Message;
+                }
                 Plots.Add(new PlotBorderModel(_settings.PlotsBorderLayer, pLines, region));
             }
         }
         catch (Exception e)
         {
-            return e.Message;
+            return "Ошибка при считывании участков " + e.Message;
         }
         return "Ok";
     }
@@ -92,14 +100,21 @@ public class ParkingCalculations
             {
                 if (br.AttributeCollection.Count == 4)
                 {
-                    ObjectId oi = br.AttributeCollection[1];
-                    var attRef = _dataImport.GetObjectOfTypeTByObjectId<AttributeReference>(oi);
-                    ObjectId oi2 = br.AttributeCollection[0];
-                    var attRef2 = _dataImport.GetObjectOfTypeTByObjectId<AttributeReference>(oi2);
-                    if (attRef != null && attRef.Tag == "Этап" && attRef2 != null && attRef2.Tag == "КОЛ-ВО")
+                    try
                     {
-                        brList.Add(br);
-                        attList.Add([attRef.TextString, attRef2.TextString]);
+                        ObjectId oi = br.AttributeCollection[1];
+                        var attRef = _dataImport.GetObjectOfTypeTByObjectId<AttributeReference>(oi);
+                        ObjectId oi2 = br.AttributeCollection[0];
+                        var attRef2 = _dataImport.GetObjectOfTypeTByObjectId<AttributeReference>(oi2);
+                        if (attRef != null && attRef.Tag == "Этап" && attRef2 != null && attRef2.Tag == "КОЛ-ВО")
+                        {
+                            brList.Add(br);
+                            attList.Add([attRef.TextString, attRef2.TextString]);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        return $"Проблема при считывании аттрибутов блока парковки с именем {br.Name} " + e.Message;
                     }
                 }
             }
@@ -115,13 +130,13 @@ public class ParkingCalculations
             }
             if (ParkingBlocks.Count == 0)
             {
-                return "No parking blocks Found";
+                return "Не найдены блоки парковок";
             }
             return "Ok";
         }
         catch (Exception e)
         {
-            return e.Message;
+            return "Ошибка при обработке блоков существующей парковки" + e.Message;
         }
     }
     private string GetAllBuildings()
@@ -153,6 +168,11 @@ public class ParkingCalculations
         {
             return result;
         }
+        result = GettAdditionalDataFromDrawing(_city.Name);
+        if (result != "Ok")
+        {
+            return result;
+        }
         return "Ok";
     }
     private string GetBuildings(List<BlockReference> blocks)
@@ -166,9 +186,15 @@ public class ParkingCalculations
         for (var i = 0; i < blocks.Count; i++)
         {
             var name = blocks[i].IsDynamicBlock ? ((BlockTableRecord)blocks[i].DynamicBlockTableRecord.GetObject(OpenMode.ForRead)).Name : blocks[i].Name;
+            var id = Array.IndexOf(_settings.BuildingBlockNames, name);
+            if (id == -1)
+            {
+                return $"Не распознан блок с именем {name}, возможно он лишний";
+            }
+            BuildingType type = id == 0 ? BuildingType.Residential : id == 1 ? BuildingType.Parking : BuildingType.Other;
             try
             {
-                BuildingModel model = new(attrBuildings[i], _settings.BuildingAttributeNames, blocks[i].Position, BuildingType.Residential, plotNumbers[i], name);
+                BuildingModel model = new(attrBuildings[i], _settings.BuildingAttributeNames, blocks[i].Position, type, plotNumbers[i], name);
                 Buildings.Add(model);
             }
             catch (Exception)
@@ -187,16 +213,28 @@ public class ParkingCalculations
         {
             if (!attrBuildings[i].ContainsKey("п0_Поз"))
                 return "В одном из блоков встроя нет параметра п0_Поз";
-
+            var blockName = blocks[i].IsDynamicBlock ? ((BlockTableRecord)blocks[i].DynamicBlockTableRecord.GetObject(OpenMode.ForRead)).Name : blocks[i].Name;
+            BuildingModel model;
             string name = attrBuildings[i]["п0_Поз"];
-            BuildingModel model = Buildings.Where(x => x.Name == name).First();
-
+            try
+            {
+                model = Buildings.Where(x => x.Name == name).First();
+            }
+            catch (Exception)
+            {
+                return $"Не найдено здания для встроя {name}";
+            }
             if (model == null)
                 return $"Ошибка, не найден дом {name}, на который ссылается встрой";
 
-            var blockName = blocks[i].IsDynamicBlock ? ((BlockTableRecord)blocks[i].DynamicBlockTableRecord.GetObject(OpenMode.ForRead)).Name : blocks[i].Name;
-
-            model.BuiltInParameters.Add(new BuiltInParameters(blockName, attrBuildings[i]));
+            if (blockName != _settings.BuiltInParkingBlockName)
+            {
+                model.BuiltInParameters.Add(new BuiltInParameters(blockName, attrBuildings[i]));
+            }
+            else
+            {
+                model.BuiltInParking = new BuiltInParkingModel(attrBuildings[i]);
+            }
         }
         return "Ok";
     }
@@ -216,17 +254,18 @@ public class ParkingCalculations
     }
     private string CalculateExistingParkingByBuilding()
     {
-        try
+        foreach (var item in Buildings)
         {
-            foreach (var item in Buildings)
+            try
             {
                 item.FillInProvidedParking(ParkingBlocks.Where(x => x.ParkingIsForBuildingName == item.Name).ToList(), InBuildingParkingBlocks.Where(x => x.ParkingIsForBuildingName == item.Name).ToList());
             }
+            catch (Exception e)
+            {
+                return $"Проблема при подсчете существующихпарковок для здания {item.Name} " + e.Message;
+            }
         }
-        catch (Exception e)
-        {
-            return e.Message;
-        }
+
         return "Ok";
     }
     private (List<string[]>?, string) CalculateExistingParkingDataForTable()
@@ -255,7 +294,7 @@ public class ParkingCalculations
         }
         catch (Exception e)
         {
-            return (null, e.Message);
+            return (null, "Проблема при создании строк существующих парковок" + e.Message);
         }
     }
     private (List<string[]>?, string) CalculateExistingParkingDataTotals()
@@ -355,6 +394,39 @@ public class ParkingCalculations
         foreach (var plot in PlotNumbers)
         {
             string[] line = new string[BuildingNames.Count * 6 + 9];
+            var buildingsOnCurrentPlot = Buildings.Where(x => x.PlotNumber == plot);
+            BuildingModel? buildingOnCurrentPlot;
+            if (buildingsOnCurrentPlot.Count() == 1)
+            {
+                buildingOnCurrentPlot = buildingsOnCurrentPlot.First();
+            }
+            else
+            {
+                List<BuildingModel> parkingList = [];
+                foreach (var item in buildingsOnCurrentPlot)
+                {
+                    if (item.BuildingType == BuildingType.Parking)
+                    {
+                        parkingList.Add(item);
+                    }
+                    else
+                    {
+                        if (item.BuiltInParking != null)
+                        {
+                            parkingList.Add(item);
+                        }
+                    }
+                }
+                if (parkingList.Count == 1)
+                {
+                    buildingOnCurrentPlot = parkingList[0];
+                }
+                else
+                {
+                    buildingOnCurrentPlot = null;
+                }
+            }
+
             var blocksOnPlot = ParkingBlocks.Where(x => x.PlotNumber == plot);
 
             var inBuildingParking = InBuildingParkingBlocks.Where(x => x.PlotNumber == plot);
@@ -392,7 +464,24 @@ public class ParkingCalculations
             {
                 string[] secondLine = new string[BuildingNames.Count * 6 + 9];
                 secondLine[0] = "";
-                secondLine[1] = "Паркинг";
+
+                if (buildingOnCurrentPlot == null)
+                {
+                    secondLine[1] = "Паркинг";
+                }
+                else if (buildingOnCurrentPlot.BuildingType == BuildingType.Parking)
+                {
+                    secondLine[1] = "Паркинг " + buildingOnCurrentPlot.Name + $"({buildingOnCurrentPlot.Parameters["п1_Кол_машиномест_всего_шт"]} м/мест)";
+                }
+                else if (buildingOnCurrentPlot.BuiltInParking == null)
+                {
+                    secondLine[1] = "Паркинг";
+                }
+                else
+                {
+                    secondLine[1] = "Паркинг " + buildingOnCurrentPlot.Name + $"({buildingOnCurrentPlot.BuiltInParking.TotalParkingSpaces} м/мест)";
+                }
+
                 int newCounter = 2;
                 foreach (var name in BuildingNames)
                 {
@@ -425,12 +514,17 @@ public class ParkingCalculations
         {
             foreach (var building in Buildings)
             {
-                building.ParkingReqirements.CalculateParkingReqirementsForBuilding(building, _settings, _city);
+                var result = building.ParkingReqirements.CalculateParkingReqirementsForBuilding(building, _settings, _city);
+                if (result != "Ok")
+                {
+                    return (null, result);
+                }
+
             }
         }
         catch (Exception e)
         {
-            return (null, e.Message);
+            return (null, "Проблема при создании строки с требуемыми местами для таблицы: " + e.Message);
         }
         //Filling data for the table
         line[0] = "Требуется";
@@ -461,24 +555,72 @@ public class ParkingCalculations
     {
         try
         {
-            var buildingsFromBuildingModels = Buildings.Select(x => x.Name).Distinct();
-            var buildingsFromParkingModels = ParkingBlocks.Select(x => x.ParkingIsForBuildingName).Distinct();
-            var bulidings = buildingsFromBuildingModels.Concat(buildingsFromParkingModels);
+            var buildings = Buildings.Select(x => x.Name).Distinct();
 
-            BuildingNames.AddRange(bulidings.Distinct().OrderBy(x => x).ToList());
+            var buildingsFromParkingModels = ParkingBlocks.Select(x => x.ParkingIsForBuildingName).Distinct();
+
+            string errorbuildings = "";
+            foreach (var building in buildingsFromParkingModels)
+            {
+                if (!buildings.Contains(building))
+                {
+                    errorbuildings += "" + building;
+                }
+            }
+            if (errorbuildings != "")
+            {
+                return $"Найдены парковки для несуществующих зданий:{errorbuildings}";
+            }
+            BuildingNames.AddRange(buildings.Distinct().OrderBy(x => x).ToList());
             PlotNumbers.AddRange(Plots.Select(x => x.PlotNumber).Distinct().OrderBy(x => x).ToList());
         }
         catch (Exception e)
         {
-            return e.Message;
+            return "Проблема при составлении списка зданий и участков: " + e.Message;
         }
         if (PlotNumbers.Count == 0)
         {
-            return "No plots found";
+            return "Не найдены участки";
         }
         if (BuildingNames.Count == 0)
         {
-            return "No buildings found";
+            return "Не найдены здания";
+        }
+        return "Ok";
+    }
+    private string GettAdditionalDataFromDrawing(string cityName)
+    {
+        if (cityName.Contains("Москва"))
+        {
+            (var result, var blockRef) = _dataImport.GetSingularBlockReferenceByBlockName("Баллы для  МСК");
+            if (result != "Ok")
+            {
+                return result;
+            }
+            (var result2, var blockRef2) = _dataImport.GetSingularBlockReferenceByBlockName("Коэфф МСК");
+            if (result2 != "Ok")
+            {
+                return result2;
+            }
+            var attributes = _workWithBlocks!.GetAllAttributesFromBlockReferences([blockRef!, blockRef2!]);
+            try
+            {
+                for (var i = 0; i < Buildings.Count; i++)
+                {
+                    Buildings[i].Parameters.Add("ПРОЦЕНТ", attributes[0]["ПРОЦЕНТ"]);
+                    Buildings[i].Parameters.Add("КООФ_УРБАН", attributes[1]["КООФ_УРБАН"]);
+                    Buildings[i].Parameters.Add("КООФ_ГПТ", attributes[1]["КООФ_ГПТ"]);
+                    for (var j = 0; j < Buildings[i].BuiltInParameters.Count; j++)
+                    {
+                        Buildings[i].BuiltInParameters[j].Parameters.Add("КООФ_УРБАН", attributes[1]["КООФ_УРБАН"]);
+                        Buildings[i].BuiltInParameters[j].Parameters.Add("КООФ_ГПТ", attributes[1]["КООФ_ГПТ"]);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return "В блоке параметров Москвы не найдены нужные параметры " + e.Message;
+            }
         }
         return "Ok";
     }
@@ -563,8 +705,15 @@ public class ParkingCalculations
                 {
                     linesForTable.Add(proficitLine);
                 }
-
-                TableStyleModel style = CreateTableStyleForParkingTable(linesForTable);
+                TableStyleModel style;
+                try
+                {
+                    style = CreateTableStyleForParkingTable(linesForTable);
+                }
+                catch (Exception e)
+                {
+                    return "Проблема при созаднии оформления таблицы" + e.Message;
+                }
 
                 var point = _userInput.GetInsertionPoint();
 

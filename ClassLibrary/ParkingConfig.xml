@@ -12,6 +12,7 @@
 		<string>РасширенноеММ</string> 
 		<string>Электромобили</string>
 	</ParkingBlockPararmArray>
+	<BuiltInParkingBlockName>КГП_Встрой_Паркинг</BuiltInParkingBlockName>
 	<InBuildingParkingAttributes>
 		<string>п0_Поз</string>
 		<string>п1_Для_здания</string>
@@ -23,13 +24,6 @@
 		<string>п1_Кол_для_электромобилей_шт</string>
 		<string>п1_Кол_всего_шт</string>
 	</InBuildingParkingAttributes>
-	<ParkingTypes>
-		<string>Постоянные</string>
-		<string>Временные</string>
-		<string>Гостевые</string>
-		<string>Всего</string>
-		<string>в т.ч. расш.</string>
-	</ParkingTypes>
 	<BuildingBlockNames>
 		<string>КГП_Жилой_Дом</string>
 		<string>КГП_Паркинг</string>
@@ -43,8 +37,9 @@
 		<string>КГП_ТРЦ</string>
 		<string>КГП_Магазин</string>
 		<string>КГП_Спец.магазин</string>
-		<string>КГП_Адм.здание</string>
+		<string>КГП_Банк</string>
 		<string>КГП_Соц.обслуживание</string>
+		<string>КГП_Адм.здание</string>
 		<string>КГП_КДЦ_офисное_здание</string>
 		<string>КГП_Общепит</string>
 		<string>КГП_Дом_быта</string>
@@ -58,118 +53,6 @@
 		<string>КГП_Бильярд</string>
 		<string>КГП_Сквер</string>
 	</BuildingBlockNames>
-	<SeparateBuildingAttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Пл_квартир_м2</string>
-			<string>п1_Кол_во_квартир_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_во_машиномест_всего_шт</string>
-			<string>п1_Кол_во_машиномест_инв_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_учащихся_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_учащихся_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_учащихся_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-			<string>п1_Кол_коек_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_посещений_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-			<string>п1_Кол_коек_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-			<string>п1_Кол_мест_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_посещений_шт</string>
-			<string>п1_Кол_мест_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_посещений_шт</string>
-		</AttributeNames>
-		<AttributeNames>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_посещений_шт</string>
-		</AttributeNames>
-	</SeparateBuildingAttributeNames>
 	<BuildingAttributeNames>
 		<string>п0_Очередь</string>
 		<string>п0_Поз</string>
@@ -214,46 +97,36 @@
 		<string>Временное</string>
 		<string>Гостевое</string>
 	</PakingTypeNamesInBlocks>
-	<BuildInTypeNames>
-		<string>BuildInAdditionalEducationModel</string>
-		<string>BuildInAdministrativeModel</string>
-		<string>BuildInAssortedServicesModel</string>
-	</BuildInTypeNames>
 	<BuiltInBlockNames>
+		<string>КГП_Встрой_ДОО</string>
 		<string>КГП_Встрой_Доп.образование</string>
+		<string>КГП_Встрой_Аптека</string>
+		<string>КГП_Встрой_Поликлиника</string>
+		<string>КГП_Встрой_Соц.центр</string>
+		<string>КГП_Встрой_Инф.комп.центр</string>
+		<string>КГП_Встрой_Магазины</string>
+		<string>КГП_Встрой_Спец.магазины</string>
+		<string>КГП_Встрой_Банк</string>
+		<string>КГП_Встрой_Соц.обслуживание</string>
 		<string>КГП_Встрой_Адм.помещения</string>
+		<string>КГП_Встрой_КДЦ_Офисы</string>
+		<string>КГП_Встрой_Общепит</string>
 		<string>КГП_Встрой_Дом_быта</string>
-		<string></string>
-		<string></string>
-		<string></string>
-		<string></string>
-		<string></string>
-		<string></string>
-		<string></string>
-		<string></string>
-		<string></string>
+		<string>КГП_Встрой_Комун.обслуживание</string>
+		<string>КГП_Встрой_Салоны_центры</string>
+		<string>КГП_Встрой_Библиотека</string>
+		<string>КГП_Встрой_Музеи</string>
+		<string>КГП_Встрой_ФОК</string>
+		<string>КГП_Встрой_Бассейн</string>
+		<string>КГП_Встрой_Бильярд</string>
 	</BuiltInBlockNames>
-	<BuiltInParameterNames>
-		<ParameterArray>
-			<string>п1_Кол_сотрудников_шт</string>
-			<string>п1_Кол_учащихся_шт</string>
-			<string>п1_Пл_общая_м2</string>
-		</ParameterArray>
-		<ParameterArray>
-			<string>п1_Пл_общая_м2</string>
-		</ParameterArray>
-		<ParameterArray>
-			<string>п1_Пл_общая_м2</string>
-			<string>п1_Кол_сотрудников_шт</string>
-		</ParameterArray>
-	</BuiltInParameterNames>
 	<TextToReplace>
 		<string>п1_Пл_общая_м2</string>
 		<string>п1_Пл_квартир_м2</string>
-		<string>п1_Кол_во_квартир_шт</string>
+		<string>п1_Кол_квартир_шт</string>
 		<string>п1_Кол_сотрудников_шт</string>
 		<string>п1_Кол_учащихся_шт</string>
-		<string>п1_Кол_посещений_шт</string>
+		<string>п1_Кол_посетителей_шт</string>
 		<string>п1_Кол_мест_шт</string>
 		<string>п1_Кол_коек_шт</string>
 		<string>Постоянных_на_участке_шт</string>
@@ -268,5 +141,9 @@
 		<string>Постоянных_мм_шт</string>
 		<string>Гостевых_мм_шт</string>
 		<string>Временных_мм_шт</string>
+		<string>Кол_человек_шт</string>
+		<string>ПРОЦЕНТ</string>
+		<string>КООФ_ГПТ</string>
+		<string>КООФ_УРБАН</string>
 	</TextToReplace>
 </ParkingSettings>

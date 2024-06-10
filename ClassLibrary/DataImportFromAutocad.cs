@@ -238,6 +238,39 @@ public class DataImportFromAutocad(Transaction? transaction)
         }
         return output;
     }
+    public (string, BlockReference?) GetSingularBlockReferenceByBlockName(string blockName)
+    {
+        BlockTable bT = (BlockTable)transaction.GetObject(db.BlockTableId, OpenMode.ForRead);
+        var blockId = bT[blockName];
+        var bbtr = transaction.GetObject(blockId, OpenMode.ForRead, false, true) as BlockTableRecord;
+        var anonBlokckRefCollection = bbtr.GetAnonymousBlockIds();
+
+        ObjectIdCollection bRefCollection = new();
+
+        foreach (ObjectId anonymousBtrId in anonBlokckRefCollection)
+        {
+            BlockTableRecord anonymousBtr = (BlockTableRecord)transaction.GetObject(anonymousBtrId, OpenMode.ForRead);
+            ObjectIdCollection blockRefIds = anonymousBtr.GetBlockReferenceIds(true, true);
+
+            foreach (ObjectId id in blockRefIds)
+            {
+                bRefCollection.Add(id);
+            }
+        }
+
+        if (bRefCollection.Count > 1)
+        {
+            return ($"В файле больше одного блока {blockName}", null);
+        }
+        if (bRefCollection.Count == 0)
+        {
+            return ($"В файле нет блока {blockName} или его настройка не выполнена", null);
+        }
+
+        var blockRef = (BlockReference)transaction.GetObject(bRefCollection[0], OpenMode.ForRead);
+
+        return ("Ok", blockRef);
+    }
     internal List<string> GetXRefList()
     {
         Document doc = Application.DocumentManager.MdiActiveDocument;

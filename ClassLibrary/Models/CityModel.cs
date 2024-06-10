@@ -6,6 +6,9 @@ public class CityModel
     public string ShortResidentialParkingFormula { get; set; } = "";
     public string[] NonResidentialParkingFormulas { get; set; } = [];
     public string[] BuiltInParkingFormulas { get; set; } = [];
+    public string ResidentialLongAfterFormula { get; set; } = "";
+    public string ResidentialShortAfterFormula { get; set; } = "";
+    public string CommercialShortAfterFormula { get; set; } = "";
     public string DisabledResidentialLongFormula { get; set; } = "";
     public string DisabledResidentialShortFormula { get; set; } = "";
     public string DisabledCommercialShortFormula { get; set; } = "";

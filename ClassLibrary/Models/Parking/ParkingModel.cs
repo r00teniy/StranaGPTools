@@ -122,10 +122,28 @@ internal class ParkingModel
             building.Parameters.Add("Всего_за_участком_шт", building.ParkingProvidedOutsidePlot!.TotalParking.ToString());
         }
         //MainBuilding
-        if (building.BuildingBlockName == settings.BuildingBlockNames[0])
+        if (building.BuildingBlockName != settings.BuildingBlockNames[0])
+        {
+            building.Parameters.Add("Гостевых_мм_шт", "0");
+            building.Parameters.Add("Постоянных_мм_шт", "0");
+            if (building.BuildingBlockName != settings.BuildingBlockNames[1])
+            {
+                var id = Array.IndexOf(settings.BuildingBlockNames, building.BuildingBlockName);
+                var formula = ReplaceDataInFormula(city.NonResidentialParkingFormulas[id - 2], settings.TextToReplace, building.Parameters);
+                var result = CalculateFormula(formula);
+                if (result != null)
+                {
+                    TotalCommercialShortParking = (Int32)Math.Ceiling((decimal)result);
+                }
+            }
+        }
+        else
         {
             //Calculating additional paramaters
-            building.Parameters.Add("Пл_Встроя_м2", building.BuiltInParameters.Sum(x => Convert.ToDouble(x.Parameters["п1_Пл_общая_м2"])).ToString());
+            building.Parameters.Add("Кол_человек_шт", Math.Floor(Convert.ToDouble(building.Parameters["п1_Пл_квартир_м2"]) / city.SquareMetersPerPerson).ToString());
+            var BuiltInArea = building.BuiltInParameters.Count > 0 ? building.BuiltInParameters.Sum(x => Convert.ToDouble(x.Parameters["п1_Пл_общая_м2"])) : 0;
+            building.Parameters.Add("Пл_Встроя_м2", BuiltInArea.ToString());
+
             //Calculating parking
             var longFormula = ReplaceDataInFormula(city.LongResidentialParkingFormula, settings.TextToReplace, building.Parameters);
             var result = CalculateFormula(longFormula);
@@ -142,22 +160,15 @@ internal class ParkingModel
                 building.Parameters.Add("Гостевых_мм_шт", TotalResidentialLongParking.ToString());
             }
         }
-        else if (building.BuildingBlockName != settings.BuildingBlockNames[1])
-        {
-            var id = Array.IndexOf(settings.BuildingBlockNames, building.BuildingBlockName);
-            var formula = ReplaceDataInFormula(city.NonResidentialParkingFormulas[id - 2], settings.TextToReplace, building.Parameters);
-            var result = CalculateFormula(formula);
-            if (result != null)
-            {
-                TotalCommercialShortParking = (Int32)Math.Ceiling((decimal)result);
-            }
-        }
-
 
         //BuiltIns
         foreach (var item in building.BuiltInParameters)
         {
             var index = Array.IndexOf(settings.BuiltInBlockNames, item.BlockName);
+            if (index == -1)
+            {
+                return $"В файле настрек нет блока {item.BlockName}";
+            }
             var formulaWithData = ReplaceDataInFormula(city.BuiltInParkingFormulas[index], settings.TextToReplace, item.Parameters);
             var result = CalculateFormula(formulaWithData);
 
@@ -167,6 +178,41 @@ internal class ParkingModel
             }
         }
         building.Parameters.Add("Временных_мм_шт", TotalCommercialShortParking.ToString());
+        //Additional operations
+        if (city.ResidentialLongAfterFormula != "")
+        {
+            var formulaWithData = ReplaceDataInFormula(city.ResidentialLongAfterFormula, settings.TextToReplace, building.Parameters);
+            var result = CalculateFormula(formulaWithData);
+            if (result != null)
+            {
+                TotalResidentialLongParking = Convert.ToInt32(Math.Ceiling((decimal)result));
+                building.Parameters.Remove("Постоянных_мм_шт");
+                building.Parameters.Add("Постоянных_мм_шт", TotalResidentialLongParking.ToString());
+            }
+        }
+        if (city.ResidentialShortAfterFormula != "")
+        {
+            var formulaWithData = ReplaceDataInFormula(city.ResidentialShortAfterFormula, settings.TextToReplace, building.Parameters);
+            var result = CalculateFormula(formulaWithData);
+            if (result != null)
+            {
+                TotalResidentialShortParking = Convert.ToInt32(Math.Ceiling((decimal)result));
+                building.Parameters.Remove("Гостевых_мм_шт");
+                building.Parameters.Add("Гостевых_мм_шт", TotalResidentialLongParking.ToString());
+            }
+        }
+        if (city.CommercialShortAfterFormula != "")
+        {
+            var formulaWithData = ReplaceDataInFormula(city.CommercialShortAfterFormula, settings.TextToReplace, building.Parameters);
+            var result = CalculateFormula(formulaWithData);
+            if (result != null)
+            {
+                TotalCommercialShortParking = Convert.ToInt32(Math.Ceiling((decimal)result));
+                building.Parameters.Remove("Временных_мм_шт");
+                building.Parameters.Add("Временных_мм_шт", TotalCommercialShortParking.ToString());
+            }
+        }
+
         //Disabled
         var disabledFormula = ReplaceDataInFormula(city.DisabledResidentialShortFormula, settings.TextToReplace, building.Parameters);
         var disabledResult = CalculateFormula(disabledFormula);

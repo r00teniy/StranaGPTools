@@ -18,6 +18,7 @@ internal class BuildingModel
     public string BuildingBlockName { get; set; }
     public Dictionary<string, string> Parameters { get; set; }
     public List<BuiltInParameters> BuiltInParameters { get; set; } = [];
+    public BuiltInParkingModel? BuiltInParking { get; set; }
     //public AmenitiesForBuildingModel Amenities { get; set; } = new();
     public ParkingModel ParkingReqirements { get; set; } = new();
     public List<ParkingBlockModel> ParkingBlocks { get; set; } = [];
@@ -41,10 +42,17 @@ internal class BuildingModel
     }
     public string FillInProvidedParking(List<ParkingBlockModel> list, List<InBuildingParkingBlockModel> model)
     {
-        ParkingBlocks = list.Where(x => x.ParkingIsForBuildingName == Name).ToList();
-        InBuildingParkingBlocks = model;
-        ParkingProvidedOnPlot = new ParkingModel(ParkingBlocks, InBuildingParkingBlocks, Name, PlotNumber, true);
-        ParkingProvidedOutsidePlot = new ParkingModel(ParkingBlocks, InBuildingParkingBlocks, Name, PlotNumber, false);
+        try
+        {
+            ParkingBlocks = list.Where(x => x.ParkingIsForBuildingName == Name).ToList();
+            InBuildingParkingBlocks = model;
+            ParkingProvidedOnPlot = new ParkingModel(ParkingBlocks, InBuildingParkingBlocks, Name, PlotNumber, true);
+            ParkingProvidedOutsidePlot = new ParkingModel(ParkingBlocks, InBuildingParkingBlocks, Name, PlotNumber, false);
+        }
+        catch (Exception e)
+        {
+            return "Ошибка при заполнении существующих парковок" + e.Message;
+        }
 
         return "Ok";
     }
