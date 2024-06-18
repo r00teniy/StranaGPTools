@@ -19,4 +19,6 @@ public class ParkingSettings
     public string[] TextToReplace { get; set; } = [];
     public string ParkingBlocksLayer { get; set; } = "";
     public string BuiltInParkingBlockName { get; set; } = "";
+    public string KPGBlocksFilePath { get; set; } = "";
+    public LayerModel KGPLayer { get; set; } = new();
 }

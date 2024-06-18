@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ClassLibrary.Models;
-internal class LayerModel
+public class LayerModel
 {
     public string LayerName { get; set; } = "";
     public Color LayerColor { get; set; } = Color.FromColorIndex(ColorMethod.ByAci, 0);

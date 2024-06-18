@@ -1,6 +1,10 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
+
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ClassLibrary.Models;
 using ClassLibrary.Models.Settings;
@@ -27,5 +31,44 @@ public static class SettingsStorage
             settings = (List<CityModel>)serializer.Deserialize(reader);
         }
         return settings;
+    }
+    internal static void SaveDataToDWG(string parameterName, string cityName)
+    {
+        Document doc = Application.DocumentManager.MdiActiveDocument;
+        Database db = doc.Database;
+        using (Transaction tr = db.TransactionManager.StartTransaction())
+        {
+            using (DocumentLock acLckDoc = doc.LockDocument())
+            {
+                if (cityName != "")
+                {
+                    db.SetCustomProperty(parameterName, cityName);
+                }
+                tr.Commit();
+            }
+        }
+    }
+    internal static string ReadData(string parameterName)
+    {
+        Document doc = Application.DocumentManager.MdiActiveDocument;
+        Database db = doc.Database;
+
+        return db.GetCustomProperty(parameterName);
+    }
+    public static string GetCustomProperty(this Database db, string key)
+    {
+        DatabaseSummaryInfoBuilder sumInfo = new(db.SummaryInfo);
+        IDictionary custProps = sumInfo.CustomPropertyTable;
+        return (string)custProps[key];
+    }
+    public static void SetCustomProperty(this Database db, string key, string value)
+    {
+        DatabaseSummaryInfoBuilder infoBuilder = new(db.SummaryInfo);
+        IDictionary custProps = infoBuilder.CustomPropertyTable;
+        if (custProps.Contains(key))
+            custProps[key] = value;
+        else
+            custProps.Add(key, value);
+        db.SummaryInfo = infoBuilder.ToDatabaseSummaryInfo();
     }
 }

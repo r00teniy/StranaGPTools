@@ -1,0 +1,75 @@
+﻿<Window x:Class="ClassLibrary.GUI.KGPBlocksWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClassLibrary.GUI"
+        d:DataContext="{d:DesignInstance Type=local:KGPBlockWindowModel}"
+        mc:Ignorable="d"
+        Title="Вставка блоков для КГП" FontSize="18" Height="400" Width="600" Topmost="True" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!-- Row 0-->
+        <Label
+            Content="Выберите город: "
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"/>
+        <ComboBox
+            ItemsSource="{Binding CityNames}"
+            SelectedIndex="{Binding SelectedCityId, Mode=TwoWay}"
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="5,5,5,5"/>
+        <!-- Row 1-->
+        <Label
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Content="Выберите тип:"/>
+        <ComboBox
+            ItemsSource="{Binding Types}"
+            SelectedIndex="{Binding SelectedTypeId, Mode=TwoWay}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="5,5,5,5"/>
+        <!-- Row 2-->
+        <ListBox
+            ItemsSource="{Binding Blocks}"
+            SelectedIndex="{Binding SelectedBlockId, Mode=TwoWay}"
+            SelectedItem="{Binding SelectedBlockName, Mode=TwoWay}"
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Grid.RowSpan="5"/>
+        <!-- Row 7-->
+        <Button Command="{Binding InsertBlockClickCommand}"
+            Content="Вставить блок"
+            Grid.Row="7"
+            Margin="5,5,5,5"/>
+        <!-- Row 8-->
+        <Button x:Name="InstructionButton"
+            Content="Инструкция"
+            Grid.Row="8"
+            Margin="5,5,5,5" Click="InstructionButton_Click"/>
+        <Button x:Name="CloseButton"
+            Content="Закрыть"
+            Grid.Row="8"
+            Grid.Column="1"
+            Margin="5,5,5,5" 
+            Click="CloseButton_Click"/>
+    </Grid>
+</Window>

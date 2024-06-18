@@ -9,7 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 namespace ClassLibrary.GUI;
 public partial class ParkingWindowModel : ObservableObject
 {
-    public List<string> CityNames { get; set; }
+    public string[] CityNames { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreateParkingTableClickCommand))]
@@ -19,11 +19,12 @@ public partial class ParkingWindowModel : ObservableObject
     private ParkingSettings _settings;
     private List<CityModel> _cities;
     private ParkingWindow _window;
-    public ParkingWindowModel(ParkingWindow window)
+    public ParkingWindowModel(ParkingWindow window, string city)
     {
         _settings = SettingsStorage.ReadParkingSettingsFromXML();
         _cities = SettingsStorage.ReadCitySettingsFromXML();
-        CityNames = _cities.Select(x => x.Name).ToList();
+        CityNames = _cities.Select(x => x.Name).ToArray();
+        SelectedCityId = Array.IndexOf(CityNames, city);
         _window = window;
     }
 
@@ -38,6 +39,7 @@ public partial class ParkingWindowModel : ObservableObject
         {
             MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
         }
+        SettingsStorage.SaveDataToDWG("Город", CityNames[SelectedCityId]);
         _window.Show();
     }
     private bool CanCreateParkingTableClick()

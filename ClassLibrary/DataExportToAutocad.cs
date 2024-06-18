@@ -40,7 +40,7 @@ public class DataExportToAutocad
                 btr.AppendEntity(acLine);
                 _transaction.AddNewlyCreatedDBObject(acLine, true);
             }
-            return "ok";
+            return "Ok";
         }
         catch (Exception e)
         {
@@ -100,7 +100,7 @@ public class DataExportToAutocad
         {
             return e.Message;
         }
-        return "ok";
+        return "Ok";
     }
     internal string CreateMleaderWithBlockForGroupOfobjects(List<List<Point3d>> pointList, MleaderStyleModel style, List<string[]> data)
     {
@@ -179,7 +179,7 @@ public class DataExportToAutocad
                 return "При попытке создать выноску произошла ошибка " + e.Message + " в модуле " + e.StackTrace;
             }
         }
-        return "ok";
+        return "Ok";
     }
     internal void CheckIfLayerExistAndCreateIfNot(LayerModel model)
     {
@@ -212,7 +212,7 @@ public class DataExportToAutocad
             }
         }
     }
-    internal string InsertBlockFromDifferentFileByName(string filePath, string blockname, LayerModel model)
+    internal string InsertBlockFromDifferentFileByName(string filePath, string blockname, LayerModel model, List<ParameterToChange>? parameters = null)
     {
         try
         {
@@ -242,16 +242,50 @@ public class DataExportToAutocad
             if (pt != null)
             {
                 using BlockReference newBlock = new((Point3d)pt, blockId);
-                var btr = (_transaction.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord)!;
+                var btr = (BlockTableRecord)_transaction.GetObject(db.CurrentSpaceId, OpenMode.ForWrite);
                 newBlock.Layer = model.LayerName;
                 btr.AppendEntity(newBlock);
                 _transaction.AddNewlyCreatedDBObject(newBlock, true);
+                //Dealing with attributes
+                BlockTableRecord blockBTR = (BlockTableRecord)blockId.GetObject(OpenMode.ForRead);
+                foreach (var item in blockBTR)
+                {
+                    var attributeDef = _transaction.GetObject(item, OpenMode.ForRead) as AttributeDefinition;
+                    if (attributeDef != null)
+                    {
+                        AttributeReference attributeRef = new();
+                        attributeRef.SetAttributeFromBlock(attributeDef, newBlock.BlockTransform);
+                        if (attributeDef.Constant)
+                            continue;
+                        newBlock.AttributeCollection.AppendAttribute(attributeRef);
+                        _transaction.AddNewlyCreatedDBObject(attributeRef, true);
+                        string newId = """"%<\_ObjId """" + newBlock.ObjectId.ToString().Substring(1, newBlock.ObjectId.ToString().Length - 2) + """">%"""";
+                        var textString = attributeDef.getTextWithFieldCodes().Replace("?BlockRefId", newId);
+                        var field = new Field(textString);
+                        field.Evaluate();
+                        var evalResult = field.EvaluationStatus;
+                        if (evalResult.Status == FieldEvaluationStatus.Success)
+                        {
+                            attributeRef.SetField(field);
+                            _transaction.AddNewlyCreatedDBObject(field, true);
+                        }
+                        else
+                        {
+                            attributeRef.TextString = textString;
+                        }
+                    }
+                }
+                if (parameters != null)
+                {
+                    var wwb = new WorkWithBlocks(_transaction);
+                    wwb.SetBlockParameters(newBlock, parameters.Select(x => x.Name).ToArray(), parameters.Select(x => x.Value).ToArray());
+                }
             }
             else
             {
                 return "Не была выбрана точка вставки.";
             }
-            return "ok";
+            return "Ok";
         }
         catch (System.Exception e)
         {
@@ -294,7 +328,7 @@ public class DataExportToAutocad
         hat.Associative = true;
         hat.AppendLoop(HatchLoopTypes.External, pls);
         hat.EvaluateHatch(true);
-        return "ok";
+        return "Ok";
     }
     internal string CreateTableInDrawing(Point3d pt, List<string[]> data, List<double[]> blockScale, TableStyleModel style)
     {
@@ -385,7 +419,7 @@ public class DataExportToAutocad
         tb.GenerateLayout();
         btr.AppendEntity(tb);
         _transaction.AddNewlyCreatedDBObject(tb, true);
-        return "ok";
+        return "Ok";
     }
     //SupportMethods
     private void SetVisualStyles(VisualStyleModel[] styles, Table tb)

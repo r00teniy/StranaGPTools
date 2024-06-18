@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ParkingSettings>
+	<KPGBlocksFilePath>Q:\\3. Шаблоны\\Civil3D\\Генплан\\ГП_ДинБлоки_КГП.dwg</KPGBlocksFilePath>
 	<ParkTableStyleName>ГП Таблица паркомест</ParkTableStyleName>
 	<PlotsBorderLayer>11_Граница_ЗУ_КН_</PlotsBorderLayer>
 	<StageBorderLayer>13_Граница_</StageBorderLayer>
@@ -146,4 +147,7 @@
 		<string>КООФ_ГПТ</string>
 		<string>КООФ_УРБАН</string>
 	</TextToReplace>
+	<KGPLayer>
+		<LayerName>20_Блоки_КГП</LayerName>
+	</KGPLayer>
 </ParkingSettings>

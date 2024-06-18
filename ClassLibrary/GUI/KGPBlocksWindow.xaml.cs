@@ -2,11 +2,11 @@
 
 namespace ClassLibrary.GUI;
 /// <summary>
-/// Interaction logic for ParkingWindow.xaml
+/// Interaction logic for KGPBlocksWindow.xaml
 /// </summary>
-public partial class ParkingWindow : Window
+public partial class KGPBlocksWindow : Window
 {
-    public ParkingWindow()
+    public KGPBlocksWindow()
     {
         InitializeComponent();
     }
@@ -14,10 +14,9 @@ public partial class ParkingWindow : Window
     {
         Close();
     }
-
     private void InstructionButton_Click(object sender, RoutedEventArgs e)
     {
         this.Topmost = false;
-        System.Diagnostics.Process.Start("explorer.exe", "https://docs.google.com/document/d/13m6hU-5oDlJDdOtGXGIq0GtESqn_trBZ");
+        System.Diagnostics.Process.Start("explorer.exe", "https://docs.google.com/document/d/1OyBXYctV-OSKEtRH_gXMO4KQ77dhfxMg");
     }
 }

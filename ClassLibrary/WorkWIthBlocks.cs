@@ -57,4 +57,38 @@ internal class WorkWithBlocks(Transaction transaction)
             }
         }
     }
+    public void SetBlockParameters(BlockReference block, string[] attrNames, string[] attrValues)
+    {
+        var propertyCollection = block.DynamicBlockReferencePropertyCollection;
+        foreach (DynamicBlockReferenceProperty prop in propertyCollection)
+        {
+            if (attrNames.Contains(prop.PropertyName))
+            {
+                var parameterValue = attrValues[Array.IndexOf(attrNames, prop.PropertyName)];
+                switch (prop.PropertyTypeCode)
+                {
+                    case 5:
+                        prop.Value = parameterValue;
+                        break;
+                    case 2:
+                        prop.Value = Convert.ToInt32(parameterValue);
+                        break;
+                    case 3:
+                        prop.Value = Convert.ToInt16(parameterValue);
+                        break;
+                    case 1:
+                        prop.Value = Convert.ToDouble(parameterValue);
+                        break;
+                    case 4:
+                        prop.Value = Convert.ToSByte(parameterValue);
+                        break;
+                    case 13:
+                        prop.Value = Convert.ToInt64(parameterValue);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
 }

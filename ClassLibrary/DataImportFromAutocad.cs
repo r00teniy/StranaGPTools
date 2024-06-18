@@ -243,11 +243,11 @@ public class DataImportFromAutocad(Transaction? transaction)
         BlockTable bT = (BlockTable)transaction.GetObject(db.BlockTableId, OpenMode.ForRead);
         var blockId = bT[blockName];
         var bbtr = transaction.GetObject(blockId, OpenMode.ForRead, false, true) as BlockTableRecord;
-        var anonBlokckRefCollection = bbtr.GetAnonymousBlockIds();
+        var anonBlOkckRefCollection = bbtr.GetAnonymousBlockIds();
 
         ObjectIdCollection bRefCollection = new();
 
-        foreach (ObjectId anonymousBtrId in anonBlokckRefCollection)
+        foreach (ObjectId anonymousBtrId in anonBlOkckRefCollection)
         {
             BlockTableRecord anonymousBtr = (BlockTableRecord)transaction.GetObject(anonymousBtrId, OpenMode.ForRead);
             ObjectIdCollection blockRefIds = anonymousBtr.GetBlockReferenceIds(true, true);
@@ -360,9 +360,9 @@ public class DataImportFromAutocad(Transaction? transaction)
                 return ($"Произошла ошибка, в файле нет слоя {hatchLayer}", hatchStyleModel, layerModel);
             }
         }
-        return ("ok", hatchStyleModel, layerModel);
+        return ("Ok", hatchStyleModel, layerModel);
     }
-    internal string RedifineExistingBlocksFromAnotherFile(string filePath, string[] blocksNames, string[] attributesToKeep)
+    internal string RedifineExistingBlocksFromAnotherFile(string filePath, string[] blocksNames, string[] attributesTOkeep)
     {
         int errors = 0;
         BlockTable bt = (BlockTable)transaction.GetObject(db.BlockTableId, OpenMode.ForRead);
@@ -376,8 +376,8 @@ public class DataImportFromAutocad(Transaction? transaction)
             {
                 if (blockBtr.Name == blocksNames[i])
                 {
-                    ObjectIdCollection anonBlokckRefCollection = blockBtr.GetAnonymousBlockIds();
-                    foreach (ObjectId anonymousBtrId in anonBlokckRefCollection)
+                    ObjectIdCollection anonBlOkckRefCollection = blockBtr.GetAnonymousBlockIds();
+                    foreach (ObjectId anonymousBtrId in anonBlOkckRefCollection)
                     {
                         BlockTableRecord anonymousBtr = (BlockTableRecord)transaction.GetObject(anonymousBtrId, OpenMode.ForRead);
                         ObjectIdCollection blockRefIds = anonymousBtr.GetBlockReferenceIds(true, true);
@@ -433,11 +433,11 @@ public class DataImportFromAutocad(Transaction? transaction)
                     var parameters = workWithBlocks.GetAllAttributesFromBlockReferences([bRef])[0];
                     bRef.ResetBlock();
                     string[] attributes = [];
-                    for (var j = 0; j < attributesToKeep.Length; j++)
+                    for (var j = 0; j < attributesTOkeep.Length; j++)
                     {
-                        attributes[j] = parameters[attributesToKeep[j]];
+                        attributes[j] = parameters[attributesTOkeep[j]];
                     }
-                    workWithBlocks.SetBlockAttributes(bRef, attributesToKeep, attributes);
+                    workWithBlocks.SetBlockAttributes(bRef, attributesTOkeep, attributes);
                 }
             }
         }
@@ -451,7 +451,7 @@ public class DataImportFromAutocad(Transaction? transaction)
         }
         else
         {
-            return "ok";
+            return "Ok";
         }
     }
     internal T? GetObjectOfTypeTByObjectId<T>(ObjectId objectId, Transaction? tr = null) where T : Entity
