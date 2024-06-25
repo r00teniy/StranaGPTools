@@ -126,7 +126,7 @@ public class WorkWithParkingBlocks
             var dynBlockPropValues = _workWithBlocks.GetAllParametersFromBlockReferences(blocks);
             for (var i = 0; i < blocks.Count; i++)
             {
-                if (blocks[i].AttributeCollection.Count == 4)
+                if (blocks[i].AttributeCollection.Count == 3)
                 {
                     ObjectId oi = blocks[i].AttributeCollection[1];
                     var attRef = _dataImport.GetObjectOfTypeTByObjectId<AttributeReference>(oi, tr);
@@ -135,7 +135,7 @@ public class WorkWithParkingBlocks
                         Regex pattern = new(@"\d+");
                         int buildingNumber = Convert.ToInt32(pattern.Match(attRef.TextString).Value);
                         blocks[i].UpgradeOpen();
-                        blocks[i].Color = Color.FromColorIndex(ColorMethod.ByAci, settings.ParkingTableColors[buildingNumber - 1]);
+                        blocks[i].Color = Color.FromColorIndex(ColorMethod.ByAci, settings.ParkingTableColors[buildingNumber]);
                     }
                 }
             }

@@ -8,6 +8,7 @@ internal class ParkingBlockModel
     public bool IsForDisabled { get; private set; } = false;
     public bool IsForDisabledExtended { get; private set; } = false;
     public bool IsForElectricCars { get; private set; } = false;
+    public string IsOnRoofOfBuilding { get; set; } = "";
     public string PlotNumber { get; private set; } = "";
     public string ErrorMessage { get; private set; } = "";
     public ParkingBlockModel(Dictionary<string, string> attributeData, string[] attributeNames, string[] pakingTypeNamesInBlocks, string[] attrib, string plotNumber)
@@ -42,6 +43,7 @@ internal class ParkingBlockModel
         IsForDisabled = attributeData[attributeNames[2]] == "1";
         IsForDisabledExtended = attributeData[attributeNames[3]] == "1";
         PlotNumber = plotNumber;
+        IsOnRoofOfBuilding = attributeData[attributeNames[5]];
         if (attributeData.ContainsKey(attributeNames[4]))
         {
             IsForElectricCars = attributeData[attributeNames[4]] == "1";

@@ -10,8 +10,9 @@
 		<string>Размер</string>
 		<string>Тип</string>
 		<string>Обычн_МГН</string>
-		<string>РасширенноеММ</string> 
+		<string>РасширенноеММ</string>
 		<string>Электромобили</string>
+		<string>НаКровлеЗдания</string>
 	</ParkingBlockPararmArray>
 	<BuiltInParkingBlockName>КГП_Встрой_Паркинг</BuiltInParkingBlockName>
 	<InBuildingParkingAttributes>
@@ -62,6 +63,7 @@
 		<string>п0_Пл_здания_м2</string>
 	</BuildingAttributeNames>
 	<ParkingTableColors>
+		<short>9</short>
 		<short>6</short>
 		<short>30</short>
 		<short>33</short>
@@ -71,10 +73,10 @@
 		<short>85</short>
 		<short>2</short>
 		<short>3</short>
-		<short>1</short>
+		<short>20</short>
 		<short>4</short>
 		<short>200</short>
-		<short>5</short>
+		<short>120</short>
 		<short>181</short>
 		<short>140</short>
 		<short>244</short>
@@ -82,16 +84,26 @@
 		<short>161</short>
 		<short>230</short>
 		<short>214</short>
-		<short>184</short>
+		<short>190</short>
 		<short>94</short>
 		<short>66</short>
 		<short>41</short>
 		<short>155</short>
 		<short>71</short>
 		<short>211</short>
-		<short>27</short>
+		<short>34</short>
 		<short>175</short>
 		<short>241</short>
+		<short>112</short>
+		<short>13</short>
+		<short>233</short>
+		<short>52</short>
+		<short>51</short>
+		<short>11</short>
+		<short>132</short>
+		<short>220</short>
+		<short>83</short>
+		<short>150</short>
 	</ParkingTableColors>
 	<PakingTypeNamesInBlocks>
 		<string>Постоянное</string>
@@ -150,4 +162,31 @@
 	<KGPLayer>
 		<LayerName>20_Блоки_КГП</LayerName>
 	</KGPLayer>
+	<ParkingBlockAttributeNames>
+		<string>ОБЪЕКТ</string>
+		<string>КОЛ-ВО</string>
+	</ParkingBlockAttributeNames>
+	<KGPBlocksPrefix>КГП</KGPBlocksPrefix>
+	<BuiltInBlocksContain>Встрой</BuiltInBlocksContain>
+	<InBuildingParkingBlockName>КГП_Места_в_паркинге</InBuildingParkingBlockName>
+	<KGPBlockPositionParameterName>п0_Поз</KGPBlockPositionParameterName>
+	<NotOnBuildingRoofText>нет</NotOnBuildingRoofText>
+	<MustHaveParametersForBuilding>
+		<string>п0_Этажность</string>
+		<string>п0_Пл_застройки_м2</string>
+		<string>п0_Пл_здания_м2</string>
+	</MustHaveParametersForBuilding>
+	<MustHaveParametersForResidentialBuilding>
+		<string>п1_Пл_квартир_м2</string>
+		<string>п1_Кол_квартир_шт</string>
+		<string>п1_Пл_общая_м2</string>
+	</MustHaveParametersForResidentialBuilding>
+	<MustHaveParametersForParkingBuilding>
+		<string>п1_Кол_машиномест_всего_шт</string>
+		<string>п1_Кол_машиномест_МГН_шт</string>
+		<string>п1_Кол_машиномест_МГН_больших_шт</string>
+	</MustHaveParametersForParkingBuilding>
+	<MustHaveParametersForBuiltIns>
+		<string>п1_Пл_общая_м2</string>
+	</MustHaveParametersForBuiltIns>
 </ParkingSettings>

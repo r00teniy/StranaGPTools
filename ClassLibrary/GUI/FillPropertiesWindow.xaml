@@ -4,9 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClassLibrary.GUI"
-        d:DataContext="{d:DesignInstance Type=local:FillPropertiesWindowModel}"
+        d:DataContext="{d:DesignInstance Type=local:KGPBlockWindowModel}"
         mc:Ignorable="d"
-        Title="Настройка параметров блока" FontSize="18" Height="300" Width="400" Topmost="True" WindowStartupLocation="CenterScreen">
+        Title="Настройка параметров блока" FontSize="18" Height="400" Width="400" Topmost="True" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -15,9 +15,11 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <ItemsControl ItemsSource="{Binding Parameters}"
-                      Grid.RowSpan="5">
+                      Grid.RowSpan="7">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -33,7 +35,7 @@
         </ItemsControl>
         <Button Command="{Binding CreateBlockClickCommand}"
                 Content="Создать блок"
-                Grid.Row="5"
+                Grid.Row="7"
                 Margin="5,5,5,5"/>
     </Grid>
 </Window>

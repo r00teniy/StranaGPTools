@@ -1,5 +1,7 @@
-﻿using Autodesk.AutoCAD.BoundaryRepresentation;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.BoundaryRepresentation;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 
 using ClassLibrary.Models;
@@ -11,6 +13,11 @@ internal class WorkWithPolygons
     public MPolygon CreateMPolygonFromPolylines(List<Polyline> polylines)
     {
         var mPolygon = new MPolygon();
+        for (var i = 0; i < polylines.Count; i++)
+        {
+            if (polylines[i].Elevation != 0)
+                polylines[i].Elevation = 0;
+        }
         ObjectIdCollection polylineIds = new(polylines.Select(x => x.ObjectId).ToArray());
         mPolygon.CreateLoopsFromBoundaries(polylineIds, true, Tolerance.Global.EqualPoint);
         return mPolygon;
@@ -26,18 +33,22 @@ internal class WorkWithPolygons
                 results.Add(GetPointContainment(plots[i].Region, block.Position));
             }
             var numberOfHits = results.Where(x => x == PointContainment.Inside).Count();
-            if (numberOfHits != 1)
+            if (numberOfHits > 1)
             {
-                return (null, "Check plot borders for intersections");
+                Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+                ed.SetImpliedSelection(new ObjectId[1] { block.ObjectId });
+                ed.SelectImplied();
+                return (null, "Блок находится в границах более одного участка");
             }
             else if (numberOfHits == 0)
             {
-                return (null, "Block is outside existing plots");
+                Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+                ed.SetImpliedSelection(new ObjectId[1] { block.ObjectId });
+                ed.SelectImplied();
+                return (null, "Блок находится вне участков");
             }
             else
-            {
                 result.Add(plots[results.IndexOf(PointContainment.Inside)].PlotNumber);
-            }
         }
         return (result, "Ok");
     }

@@ -21,4 +21,14 @@ public class ParkingSettings
     public string BuiltInParkingBlockName { get; set; } = "";
     public string KPGBlocksFilePath { get; set; } = "";
     public LayerModel KGPLayer { get; set; } = new();
+    public string[] ParkingBlockAttributeNames { get; set; } = [];
+    public string KGPBlocksPrefix { get; set; } = "";
+    public string BuiltInBlocksContain { get; set; } = "";
+    public string InBuildingParkingBlockName { get; set; } = "";
+    public string KGPBlockPositionParameterName { get; set; } = "";
+    public string NotOnBuildingRoofText { get; set; } = "";
+    public string[] MustHaveParametersForResidentialBuilding { get; set; } = [];
+    public string[] MustHaveParametersForBuilding { get; set; } = [];
+    public string[] MustHaveParametersForParkingBuilding { get; set; } = [];
+    public string[] MustHaveParametersForBuiltIns { get; set; } = [];
 }

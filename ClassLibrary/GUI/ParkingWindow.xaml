@@ -55,7 +55,7 @@
         <Button Margin="5,5,5,5"
             Grid.Row="3"
             Grid.Column="1"
-            Content="Покрасить парковоки в ссылках"
+            Content="Покрасить парковки в ссылках"
             Command="{Binding RecolorAllParkingBlocksClickCommand}"/>
         <!-- Row 5-->
         <Button x:Name="InstructionButton"

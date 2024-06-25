@@ -77,13 +77,13 @@ internal class WorkWithBlocks(Transaction transaction)
                         prop.Value = Convert.ToInt16(parameterValue);
                         break;
                     case 1:
-                        prop.Value = Convert.ToDouble(parameterValue);
+                        prop.Value = Convert.ToDouble(parameterValue.Replace(',', '.'));
                         break;
                     case 4:
-                        prop.Value = Convert.ToSByte(parameterValue);
+                        prop.Value = Convert.ToSByte(parameterValue.Replace(',', '.'));
                         break;
                     case 13:
-                        prop.Value = Convert.ToInt64(parameterValue);
+                        prop.Value = Convert.ToInt64(parameterValue.Replace(',', '.'));
                         break;
                     default:
                         break;

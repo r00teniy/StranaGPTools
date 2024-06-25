@@ -29,9 +29,8 @@ public partial class KGPBlockWindowModel : ObservableObject
     private List<CityModel> _cities;
     private KGPBlocksWindow _window;
     [ObservableProperty]
-    /*[NotifyCanExecuteChangedFor(nameof(CreateBlockClickCommand))]*/
     public List<ParameterToChange> _parameters = [];
-    private FillPropertiesWindow _fpw;
+    private FillPropertiesWindow? _fpw = null;
 
     public KGPBlockWindowModel(KGPBlocksWindow window, string city)
     {
@@ -47,14 +46,10 @@ public partial class KGPBlockWindowModel : ObservableObject
     {
         Document doc = Application.DocumentManager.MdiActiveDocument;
         Database db = Application.DocumentManager.MdiActiveDocument.Database;
-        using (DocumentLock acLckDoc = doc.LockDocument())
-        {
-            using (Transaction tr = db.TransactionManager.StartTransaction())
-            {
-                var _dataImport = new DataImportFromAutocad(tr);
-                _allBlocks = _dataImport.GetAllBlockNamesFromFileThatStartWith(_settings.KPGBlocksFilePath, "КГП").ToArray();
-            }
-        }
+        using DocumentLock acLckDoc = doc.LockDocument();
+        using Transaction tr = db.TransactionManager.StartTransaction();
+        var _dataImport = new DataImportFromAutocad(tr);
+        _allBlocks = _dataImport.GetAllBlockNamesFromFileThatStartWith(_settings.KPGBlocksFilePath, _settings.KGPBlocksPrefix).ToArray();
     }
     partial void OnSelectedCityIdChanged(int value)
     {
@@ -67,9 +62,7 @@ public partial class KGPBlockWindowModel : ObservableObject
                 for (var i = 0; i < _cities[value].BuiltInParkingFormulas.Length; i++)
                 {
                     if (_cities[value].BuiltInParkingFormulas[i] != "0")
-                    {
                         Blocks.Add(_settings.BuiltInBlockNames[i]);
-                    }
                 }
             }
             else
@@ -79,9 +72,7 @@ public partial class KGPBlockWindowModel : ObservableObject
                 for (var i = 0; i < _cities[value].NonResidentialParkingFormulas.Length; i++)
                 {
                     if (_cities[value].NonResidentialParkingFormulas[i] != "0")
-                    {
                         Blocks.Add(_settings.BuildingBlockNames[i + 2]);
-                    }
                 }
             }
         }
@@ -97,9 +88,7 @@ public partial class KGPBlockWindowModel : ObservableObject
                 for (var i = 0; i < _cities[SelectedCityId].BuiltInParkingFormulas.Length; i++)
                 {
                     if (_cities[SelectedCityId].BuiltInParkingFormulas[i] != "0")
-                    {
                         Blocks.Add(_settings.BuiltInBlockNames[i]);
-                    }
                 }
             }
             else
@@ -109,9 +98,7 @@ public partial class KGPBlockWindowModel : ObservableObject
                 for (var i = 0; i < _cities[SelectedCityId].NonResidentialParkingFormulas.Length; i++)
                 {
                     if (_cities[SelectedCityId].NonResidentialParkingFormulas[i] != "0")
-                    {
                         Blocks.Add(_settings.BuildingBlockNames[i + 2]);
-                    }
                 }
             }
         }
@@ -121,54 +108,56 @@ public partial class KGPBlockWindowModel : ObservableObject
     {
         //Finding parameters you need to fill
         Parameters = [];
-        Parameters.Add(new() { Name = "п0_Поз" });
+        Parameters.Add(new() { Name = _settings.KGPBlockPositionParameterName });
         string formula = "";
         if (SelectedTypeId == 0)
         {
-            Parameters.Add(new() { Name = "п0_Этажность" });
-            Parameters.Add(new() { Name = "п0_Пл_застройки_м2" });
-            Parameters.Add(new() { Name = "п0_Пл_здания_м2" });
-            if (SelectedBlockName == "КГП_Жилой_Дом")
+            foreach (var item in _settings.MustHaveParametersForBuilding)
             {
-                Parameters.Add(new() { Name = "п1_Пл_квартир_м2" });
-                Parameters.Add(new() { Name = "п1_Кол_квартир_шт" });
-                Parameters.Add(new() { Name = "п1_Пл_общая_м2" });
+                Parameters.Add(new() { Name = item });
             }
-            else if (SelectedBlockName == "КГП_Паркинг")
+            if (SelectedBlockName == _settings.BuildingBlockNames[0])
             {
-                Parameters.Add(new() { Name = "п1_Кол_машиномест_всего_шт" });
-                Parameters.Add(new() { Name = "п1_Кол_машиномест_МГН_шт" });
-                Parameters.Add(new() { Name = "п1_Кол_машиномест_МГН_больших_шт" });
+                foreach (var item in _settings.MustHaveParametersForResidentialBuilding)
+                {
+                    Parameters.Add(new() { Name = item });
+                }
+            }
+            else if (SelectedBlockName == _settings.BuildingBlockNames[1])
+            {
+                foreach (var item in _settings.MustHaveParametersForParkingBuilding)
+                {
+                    Parameters.Add(new() { Name = item });
+                }
             }
             else
             {
                 formula = _cities[SelectedCityId].NonResidentialParkingFormulas[Array.IndexOf(_settings.BuildingBlockNames, SelectedBlockName) - 2];
             }
-
         }
         else
         {
             if (SelectedBlockName == _settings.BuiltInParkingBlockName)
             {
-                Parameters.Add(new() { Name = "п1_Кол_машиномест_всего_шт" });
-                Parameters.Add(new() { Name = "п1_Кол_машиномест_МГН_шт" });
-                Parameters.Add(new() { Name = "п1_Кол_машиномест_МГН_больших_шт" });
+                foreach (var item in _settings.MustHaveParametersForParkingBuilding)
+                {
+                    Parameters.Add(new() { Name = item });
+                }
             }
             else
             {
                 formula = _cities[SelectedCityId].BuiltInParkingFormulas[Array.IndexOf(_settings.BuiltInBlockNames, SelectedBlockName)];
             }
-            if (!formula.Contains("п1_Пл_общая_м2"))
+            foreach (var item in _settings.MustHaveParametersForBuiltIns)
             {
-                Parameters.Add(new() { Name = "п1_Пл_общая_м2" });
+                if (!formula.Contains(item))
+                    Parameters.Add(new() { Name = item });
             }
         }
         foreach (var text in _settings.TextToReplace)
         {
             if (formula.Contains(text))
-            {
                 Parameters.Add(new() { Name = text });
-            }
         }
         //popping window to fill them
         _fpw = new FillPropertiesWindow();
@@ -182,29 +171,23 @@ public partial class KGPBlockWindowModel : ObservableObject
             return true;
         return false;
     }
-    [RelayCommand/*(CanExecute = nameof(CanCreateBlockClick))*/]
+    [RelayCommand]
     public void CreateBlockClick()
     {
-
         if (Parameters.Where(x => x.Value == "").Count() == 0)
         {
             _window.Hide();
-            _fpw.Close();
+            _fpw!.Close();
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = Application.DocumentManager.MdiActiveDocument.Database;
-            using (DocumentLock acLckDoc = doc.LockDocument())
-            {
-                using (Transaction tr = db.TransactionManager.StartTransaction())
-                {
-                    var dataExport = new DataExportToAutocad(tr);
-                    var result = dataExport.InsertBlockFromDifferentFileByName(_settings.KPGBlocksFilePath, SelectedBlockName!, _settings.KGPLayer, Parameters);
-                    if (result != "Ok")
-                    {
-                        System.Windows.MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
-                    }
-                    tr.Commit();
-                }
-            }
+            ReplaceCommaWithDotsInParameters();
+            using DocumentLock acLckDoc = doc.LockDocument();
+            using Transaction tr = db.TransactionManager.StartTransaction();
+            var dataExport = new DataExportToAutocad(tr);
+            var result = dataExport.InsertBlockFromDifferentFileByName(_settings.KPGBlocksFilePath, SelectedBlockName!, _settings.KGPLayer, Parameters);
+            if (result != "Ok")
+                System.Windows.MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
+            tr.Commit();
             SettingsStorage.SaveDataToDWG("Город", CityNames[SelectedCityId]);
             _window.Show();
         }
@@ -214,10 +197,11 @@ public partial class KGPBlockWindowModel : ObservableObject
         }
 
     }
-    /*private bool CanCreateBlockClick()
+    private void ReplaceCommaWithDotsInParameters()
     {
-        if (Parameters.Where(x => x.Value == "").Count() == 0)
-            return true;
-        return false;
-    }*/
+        for (int i = 0; i < Parameters.Count; i++)
+        {
+            Parameters[i].Value = Parameters[i].Value.Replace(',', '.');
+        }
+    }
 }
