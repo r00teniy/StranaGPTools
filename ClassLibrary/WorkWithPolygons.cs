@@ -32,6 +32,16 @@ internal class WorkWithPolygons
             {
                 results.Add(GetPointContainment(plots[i].Region, block.Position));
             }
+
+            if (results.Where(x => x == PointContainment.OnBoundary).Count() > 0)
+            {
+                results.Clear();
+                var blockMidpoint = new Point3d((block.GeometricExtents.MinPoint.X + block.GeometricExtents.MaxPoint.X) / 2, (block.GeometricExtents.MinPoint.Y + block.GeometricExtents.MaxPoint.Y) / 2, 0);
+                for (int i = 0; i < plots.Count; i++)
+                {
+                    results.Add(GetPointContainment(plots[i].Region, blockMidpoint));
+                }
+            }
             var numberOfHits = results.Where(x => x == PointContainment.Inside).Count();
             if (numberOfHits > 1)
             {

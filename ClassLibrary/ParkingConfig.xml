@@ -18,13 +18,13 @@
 	<InBuildingParkingAttributes>
 		<string>п0_Поз</string>
 		<string>п1_Для_здания</string>
-		<string>п1_Кол_постоянных_шт</string>
-		<string>п1_Кол_гостевых_шт</string>
-		<string>п1_Кол_временных_шт</string>
-		<string>п1_Кол_для_ММГН_шт</string>
-		<string>п1_Кол_для_ММГН_больших_шт</string>
-		<string>п1_Кол_для_электромобилей_шт</string>
-		<string>п1_Кол_всего_шт</string>
+		<string>п1_Кол_машиномест_постоянных_шт</string>
+		<string>п1_Кол_машиномест_гостевых_шт</string>
+		<string>п1_Кол_машиномест_временных_шт</string>
+		<string>п1_Кол_машиномест_МГН_шт</string>
+		<string>п1_Кол_машиномест_МГН_больших_шт</string>
+		<string>п1_Кол_машиномест_для_электромобилей_шт</string>
+		<string>п1_Кол_машиномест_всего_шт</string>
 	</InBuildingParkingAttributes>
 	<BuildingBlockNames>
 		<string>КГП_Жилой_Дом</string>

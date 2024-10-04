@@ -33,6 +33,7 @@ public class ParkingCalculations
     private List<InBuildingParkingBlockModel> InBuildingParkingBlocks { get; set; } = [];
     private List<ParkingBlockModel> ParkingBlocks { get; set; } = [];
     private List<string> BuildingNames { get; set; } = [];
+    private List<string> BuildingNamesForTable { get; set; } = [];
     private List<string> PlotNumbers { get; set; } = [];
 
     private string GetAllPlots()
@@ -179,7 +180,7 @@ public class ParkingCalculations
         {
             return result;
         }
-        result = GettAdditionalDataFromDrawing(_city.Name);
+        result = GetAdditionalDataFromDrawing(_city.Name);
         if (result != "Ok")
         {
             return result;
@@ -213,6 +214,13 @@ public class ParkingCalculations
                 return $"Проблема при считывании параметров дома {name}, проверьте данные";
             }
         }
+        var positions = Buildings.Select(x => x.Name);
+        foreach (var item in positions)
+        {
+            if (positions.Where(x => x == item).Count() > 1)
+                return $"Найдено больше одного здания с позицией {item}, необходимо оставить только одно";
+        }
+
         Regex pattern = new(@"\d+");
         Buildings = Buildings.OrderBy(x => pattern.Match(x.Name).Value).ToList();
         return "Ok";
@@ -251,17 +259,26 @@ public class ParkingCalculations
     }
     private string GetAllInBuildingParkingBlocks(List<BlockReference> blocks)
     {
-        var attrBuildings = _workWithBlocks!.GetAllParametersFromBlockReferences(blocks);
-        (List<string>? plotnumbers, string result) = _workWithPolygons.GetPlotNumbersFromBlocks(blocks, Plots);
-        if (result == null || plotnumbers == null || result != "Ok")
+        try
         {
-            return result ?? "Error while assigning plots to blocks";
+            var attrBuildings = _workWithBlocks!.GetAllParametersFromBlockReferences(blocks);
+            /*Using plots of building itself, so we don't care about plots of blocks
+            (List<string>? plotnumbers, string result) = _workWithPolygons.GetPlotNumbersFromBlocks(blocks, Plots);
+            if (result == null || plotnumbers == null || result != "Ok")
+            {
+                return result ?? "Error while assigning plots to blocks";
+            }*/
+            for (var i = 0; i < attrBuildings.Count; i++)
+            {
+                InBuildingParkingBlocks.Add(new InBuildingParkingBlockModel(attrBuildings[i], _settings.InBuildingParkingAttributes, Buildings));
+            }
+            return "Ok";
         }
-        for (var i = 0; i < attrBuildings.Count; i++)
+        catch (Exception e)
         {
-            InBuildingParkingBlocks.Add(new InBuildingParkingBlockModel(attrBuildings[i], _settings.InBuildingParkingAttributes, plotnumbers[i]));
+
+            return e.Message;
         }
-        return "Ok";
     }
     private string CalculateExistingParkingByBuilding()
     {
@@ -316,7 +333,7 @@ public class ParkingCalculations
     {
         //Totals
         List<string[]> output = [];
-        string[] totalLine = new string[BuildingNames.Count * 6 + 9];
+        string[] totalLine = new string[BuildingNamesForTable.Count * 6 + 9];
         //Checking if there are parkings outside
         var parkingOutside = Buildings.Where(x => x.ParkingProvidedOutsidePlot!.TotalParking != 0).Count() > 0;
         if (parkingOutside)
@@ -331,7 +348,7 @@ public class ParkingCalculations
         }
 
         int totalCounter = 2;
-        foreach (var name in BuildingNames)
+        foreach (var name in BuildingNamesForTable)
         {
             var building = Buildings.Where(x => x.Name == name).First();
             var onPlotParking = building.ParkingProvidedOnPlot;
@@ -362,10 +379,10 @@ public class ParkingCalculations
         {
             return (output, "Ok");
         }
-        totalLine = new string[BuildingNames.Count * 6 + 9];
+        totalLine = new string[BuildingNamesForTable.Count * 6 + 9];
         totalLine[1] = "за участком ГПЗУ";
         totalCounter = 2;
-        foreach (var name in BuildingNames)
+        foreach (var name in BuildingNamesForTable)
         {
             var building = Buildings.Where(x => x.Name == name).First();
             var outsidePlotParking = building.ParkingProvidedOutsidePlot;
@@ -392,10 +409,10 @@ public class ParkingCalculations
         totalLine[totalCounter + 5] = Buildings.Sum(x => x.ParkingProvidedOutsidePlot!.TotalForElectricCarsParking).ToString();
         totalLine[totalCounter + 6] = Buildings.Sum(x => x.ParkingProvidedOutsidePlot!.TotalParking).ToString();
         output.Add(totalLine);
-        totalLine = new string[BuildingNames.Count * 6 + 9];
+        totalLine = new string[BuildingNamesForTable.Count * 6 + 9];
         totalLine[1] = "Итого";
         var numberOflines = output.Count;
-        for (int i = 2; i < BuildingNames.Count * 6 + 9; i++)
+        for (int i = 2; i < BuildingNamesForTable.Count * 6 + 9; i++)
         {
             totalLine[i] = (Convert.ToInt32(output[numberOflines - 1][i]) + Convert.ToInt32(output[numberOflines - 2][i])).ToString();
         }
@@ -408,7 +425,7 @@ public class ParkingCalculations
         List<string[]> output = [];
         foreach (var plot in PlotNumbers)
         {
-            string[] line = new string[BuildingNames.Count * 6 + 9];
+            string[] line = new string[BuildingNamesForTable.Count * 6 + 9];
             var buildingsOnCurrentPlot = Buildings.Where(x => x.PlotNumber == plot);
             BuildingModel? buildingOnCurrentPlot;
             if (buildingsOnCurrentPlot.Count() == 1)
@@ -455,7 +472,7 @@ public class ParkingCalculations
                 line[1] = "";
             }
             int counter = 2;
-            foreach (var name in BuildingNames)
+            foreach (var name in BuildingNamesForTable)
             {
                 var blocksForBuilding = blocksOnPlot.Where(x => x.ParkingIsForBuildingName == name);
                 line[counter] = blocksForBuilding.Where(x => x.Type == ParkingType.Long).Select(x => x.NumberOfParkings).Sum(x => x).ToString();
@@ -487,7 +504,7 @@ public class ParkingCalculations
                     {
                         return (null, $"Не найден паркинг {item}, которой прописан в блоке парковок");
                     }
-                    string[] secondLine = new string[BuildingNames.Count * 6 + 9];
+                    string[] secondLine = new string[BuildingNamesForTable.Count * 6 + 9];
                     secondLine[0] = "";
                     if (building.BuildingType == BuildingType.Parking)
                     {
@@ -506,7 +523,7 @@ public class ParkingCalculations
                     }
                     int newCounter = 2;
 
-                    foreach (var name in BuildingNames)
+                    foreach (var name in BuildingNamesForTable)
                     {
                         var blocksForBuilding = inBuildingParking.Where(x => x.ParkingIsForBuildingName == name && x.ParkingIsInBuilding == item);
                         secondLine[newCounter] = blocksForBuilding.Select(x => x.NumberOfParkingsLong).Sum(x => x).ToString();
@@ -543,11 +560,11 @@ public class ParkingCalculations
                     {
                         return (null, $"Не найдено здание {item}, кровля которого указана в блоке парковок");
                     }
-                    string[] newLine = new string[BuildingNames.Count * 6 + 9];
+                    string[] newLine = new string[BuildingNamesForTable.Count * 6 + 9];
                     newLine[0] = "";
                     newLine[1] = building.BuildingType == BuildingType.Parking ? "На кровле паркинга " + building.Name : "На кровле здания " + building.Name;
                     counter = 2;
-                    foreach (var name in BuildingNames)
+                    foreach (var name in BuildingNamesForTable)
                     {
                         var blocksForBuilding = blocksOnRoofOfBuilding.Where(x => x.ParkingIsForBuildingName == name);
                         newLine[counter] = blocksForBuilding.Where(x => x.Type == ParkingType.Long).Select(x => x.NumberOfParkings).Sum(x => x).ToString();
@@ -573,7 +590,7 @@ public class ParkingCalculations
     }
     private (string[]?, string) CalculateRequiredParkingDataForTable()
     {
-        string[] line = new string[BuildingNames.Count * 6 + 9];
+        string[] line = new string[BuildingNamesForTable.Count * 6 + 9];
         try
         {
             foreach (var building in Buildings)
@@ -593,7 +610,7 @@ public class ParkingCalculations
         line[0] = "Требуется";
         line[1] = "";
         int counter = 2;
-        foreach (var name in BuildingNames)
+        foreach (var name in BuildingNamesForTable)
         {
             var building = Buildings.Where(x => x.Name == name).First();
             line[counter] = building.ParkingReqirements.TotalResidentialLongParking.ToString();
@@ -632,6 +649,14 @@ public class ParkingCalculations
                 return $"Найдены парковки для несуществующих зданий:{errorbuildings}";
             BuildingNames.AddRange(buildings.Distinct().OrderBy(x => x).ToList());
             PlotNumbers.AddRange(Plots.Select(x => x.PlotNumber).Distinct().OrderBy(x => x).ToList());
+            foreach (var building in Buildings)
+            {
+                if (building.BuildingType == BuildingType.Parking && building.BuiltInParameters.Count == 0)
+                {
+                    continue;
+                }
+                BuildingNamesForTable.Add(building.Name);
+            }
         }
         catch (Exception e)
         {
@@ -647,7 +672,7 @@ public class ParkingCalculations
         }
         return "Ok";
     }
-    private string GettAdditionalDataFromDrawing(string cityName)
+    private string GetAdditionalDataFromDrawing(string cityName)
     {
         if (cityName.Contains("Москва"))
         {
@@ -825,12 +850,42 @@ public class ParkingCalculations
                 return $"Не найден блок здания {buildName}, на которое ссылаются обычные блоки парковок";
             }
         }
-        buildNames = ParkingBlocks.Select(x => x.IsOnRoofOfBuilding).Distinct();
-        foreach (var buildName in buildNames)
+        var parkingBlocksToCheck = ParkingBlocks.Where(x => x.IsOnRoofOfBuilding != _settings.NotOnBuildingRoofText).Distinct();
+        foreach (var buildName in parkingBlocksToCheck)
         {
-            if (!BuildingNames.Contains(buildName) && buildName != _settings.NotOnBuildingRoofText)
+            if (!BuildingNames.Contains(buildName.IsOnRoofOfBuilding))
             {
-                return $"Не найден блок здания {buildName}, на крышу которого ссылаются обычные блоки парковок";
+                return $"Не найден блок здания {buildName.IsOnRoofOfBuilding}, на крышу которого ссылаются обычные блоки парковок";
+            }
+            if (buildName.PlotNumber != Buildings.Where(x => x.Name == buildName.IsOnRoofOfBuilding).First().PlotNumber)
+            {
+                return $"Блок парковки на кровле {buildName.IsOnRoofOfBuilding} находится на другом участке, нежели само здание";
+            }
+        }
+        //Check if inbuilding parking blocks use less that parking capacity is
+        var parkingsByParkingBuilding = InBuildingParkingBlocks.GroupBy(x => x.ParkingIsInBuilding);
+        foreach (var item in parkingsByParkingBuilding)
+        {
+            //getting capacity numbers 
+            var building = Buildings.Where(x => x.Name == item.Key).First();
+            var totalCapacity = building.BuildingType == BuildingType.Parking ? Convert.ToInt32(building.Parameters[_settings.InBuildingParkingAttributes[8]]) : building.BuiltInParking!.TotalParkingSpaces;
+            var totalDisabled = building.BuildingType == BuildingType.Parking ? Convert.ToInt32(building.Parameters[_settings.InBuildingParkingAttributes[5]]) : building.BuiltInParking!.TotalDisabledParkingSpaces;
+            var totalDisabledBig = building.BuildingType == BuildingType.Parking ? Convert.ToInt32(building.Parameters[_settings.InBuildingParkingAttributes[6]]) : building.BuiltInParking!.TotalDisabledBigParkingSpaces;
+            //getting used numbers
+            var usedCapacity = item.Select(x => x.NumberOfParkingsTotal).Sum();
+            var usedDisabled = item.Select(x => x.NumberOfParkingsForDisabled).Sum();
+            var usedDisabledBig = item.Select(x => x.NumberOfParkingsForDisabledExtended).Sum();
+            if (usedCapacity > totalCapacity)
+            {
+                return $"В паркинге {building.Name} размещено {usedCapacity} м/мест, хотя вместимость паринга {totalCapacity} м/мест, необходимо исправить";
+            }
+            if (usedDisabled > totalDisabled)
+            {
+                return $"В паркинге {building.Name} размещено {usedDisabled} м/мест для инвалидов, хотя в паринге предусмотрено только {totalDisabled} м/мест для инвалидов, необходимо исправить";
+            }
+            if (usedDisabledBig > totalDisabledBig)
+            {
+                return $"В паркинге {building.Name} размещено {usedDisabledBig} расширенных м/мест для инвалидов, хотя в паринге предусмотрено только {totalDisabledBig} расширенных м/мест для инвалидов, необходимо исправить";
             }
         }
         return "Ok";
@@ -839,6 +894,7 @@ public class ParkingCalculations
     private TableStyleModel CreateTableStyleForParkingTable(List<string[]> linesForTable)
     {
         TableStyleModel style = new();
+        style.Layer = "71_Парк._Ведомости";
         style.StyleName = "ГП Таблица паркомест";
         style.TitleStyleName = "Название";
         style.Title = "Сводная таблица автостоянок на площадке";
@@ -869,9 +925,9 @@ public class ParkingCalculations
             SecondRow = 1
         };
         header.Add(range2);
-        for (var i = 0; i < BuildingNames.Count; i++)
+        for (var i = 0; i < BuildingNamesForTable.Count; i++)
         {
-            firstLine[2 + i * 6] = BuildingNames[i];
+            firstLine[2 + i * 6] = BuildingNamesForTable[i];
             var range = new TableRangeModel()
             {
                 FirstCollumn = 2 + i * 6,
@@ -920,7 +976,7 @@ public class ParkingCalculations
             SecondRow = 3
         };
         header.Add(range2);
-        for (var i = 0; i < BuildingNames.Count + 1; i++)
+        for (var i = 0; i < BuildingNamesForTable.Count + 1; i++)
         {
             secondLine[2 + i * 6] = "Постоянные";
             var range = new TableRangeModel()
@@ -963,7 +1019,7 @@ public class ParkingCalculations
             header.Add(range);
         }
         var thirdLine = new string[linesForTable[0].Length];
-        for (var i = 0; i < BuildingNames.Count + 1; i++)
+        for (var i = 0; i < BuildingNamesForTable.Count + 1; i++)
         {
             thirdLine[5 + i * 6] = "МГН всего";
             cells.Add(new CellStyleModel()
@@ -1060,10 +1116,10 @@ public class ParkingCalculations
             SetRightBorder = true
         });
         var currentCollumn = 2;
-        foreach (var building in Buildings)
+        foreach (var building in BuildingNamesForTable)
         {
             Regex pattern = new(@"\d+");
-            int buildingNumber = Convert.ToInt32(pattern.Match(building.Name).Value);
+            int buildingNumber = Convert.ToInt32(pattern.Match(building).Value);
             visuals.Add(new VisualStyleModel()
             {
                 FirstCollumn = currentCollumn,

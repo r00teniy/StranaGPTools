@@ -33,11 +33,18 @@ public partial class ParkingWindowModel : ObservableObject
     {
         _window.Hide();
 
-        var pc = new ParkingCalculations(_settings, _cities[SelectedCityId]);
-        var result = pc.CreateParkingTable();
-        if (result != "Ok")
+        try
         {
-            MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
+            var pc = new ParkingCalculations(_settings, _cities[SelectedCityId]);
+            var result = pc.CreateParkingTable();
+            if (result != "Ok")
+            {
+                MessageBox.Show("Произошла ошибка " + result, "Сообщение", System.Windows.MessageBoxButton.OK);
+            }
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show("Произошла ошибка " + e.Message + e.StackTrace, "Сообщение", System.Windows.MessageBoxButton.OK);
         }
         SettingsStorage.SaveDataToDWG("Город", CityNames[SelectedCityId]);
         _window.Show();

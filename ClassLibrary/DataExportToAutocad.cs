@@ -350,14 +350,12 @@ public class DataExportToAutocad
             Position = pt,
             TableStyle = tbSt
         };
-        try
-        {
-            tb.Layer = style.Layer;
-        }
-        catch (Exception)
-        {
-            return $"В файле отсутствует нужный слой для таблиц {style.Layer}, необходимо работать в шаблоне. Таблица создана на текущем слое";
-        }
+
+        var model = new LayerModel();
+        model.LayerName = style.Layer;
+        CheckIfLayerExistAndCreateIfNot(model);
+        tb.Layer = style.Layer;
+
         tb.Rows[0].Style = style.TitleStyleName;
         tb.Cells[0, 0].TextString = style.Title;
         tb.SetRowHeight(10);

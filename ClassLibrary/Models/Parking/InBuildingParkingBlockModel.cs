@@ -12,7 +12,7 @@ internal class InBuildingParkingBlockModel
     public int NumberOfParkingsTotal { get; private set; } = 0;
     public string PlotNumber { get; private set; } = "";
     public string ErrorMessage { get; private set; } = "";
-    public InBuildingParkingBlockModel(Dictionary<string, string> attributes, string[] attributeNames, string plotNumber)
+    public InBuildingParkingBlockModel(Dictionary<string, string> attributes, string[] attributeNames, List<BuildingModel> buildings)
     {
         try
         {
@@ -25,7 +25,7 @@ internal class InBuildingParkingBlockModel
             NumberOfParkingsForDisabledExtended = Convert.ToInt32(attributes[attributeNames[6]]);
             NumberOfParkingsForElecticCars = Convert.ToInt32(attributes[attributeNames[7]]);
             NumberOfParkingsTotal = Convert.ToInt32(attributes[attributeNames[8]]);
-            PlotNumber = plotNumber;
+            PlotNumber = buildings.Where(x => x.Name == ParkingIsInBuilding).First().PlotNumber;
         }
         catch (Exception e)
         {
