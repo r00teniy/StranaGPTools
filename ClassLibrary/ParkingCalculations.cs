@@ -636,7 +636,6 @@ public class ParkingCalculations
         try
         {
             var buildings = Buildings.Select(x => x.Name).Distinct();
-
             var buildingsFromParkingModels = ParkingBlocks.Select(x => x.ParkingIsForBuildingName).Distinct();
 
             string errorbuildings = "";
@@ -647,7 +646,10 @@ public class ParkingCalculations
             }
             if (errorbuildings != "")
                 return $"Найдены парковки для несуществующих зданий:{errorbuildings}";
-            BuildingNames.AddRange(buildings.Distinct().OrderBy(x => x).ToList());
+
+            var pattern = @"\d+"; //pattern to get number from buildingname
+
+            BuildingNames.AddRange(buildings.Distinct().OrderBy(x => Convert.ToInt32(Regex.Match(x, pattern).Value)).ToList());
             PlotNumbers.AddRange(Plots.Select(x => x.PlotNumber).Distinct().OrderBy(x => x).ToList());
             foreach (var building in Buildings)
             {
@@ -657,6 +659,7 @@ public class ParkingCalculations
                 }
                 BuildingNamesForTable.Add(building.Name);
             }
+            BuildingNamesForTable = BuildingNamesForTable.OrderBy(x => Convert.ToInt32(Regex.Match(x, pattern).Value)).ToList(); //ordering buildings correctly
         }
         catch (Exception e)
         {
@@ -789,6 +792,7 @@ public class ParkingCalculations
                 if (deficitLine.Skip(2).Where(x => x != "0").Count() > 0)
                 {
                     linesForTable.Add(deficitLine);
+
                 }
                 if (proficitLine.Skip(2).Where(x => x != "0").Count() > 0)
                 {

@@ -256,7 +256,7 @@
 		<DisabledCommercialShortFormula>Временных_мм_шт/10</DisabledCommercialShortFormula>
 		<DisabledBigResidentialLongFormula>0</DisabledBigResidentialLongFormula>
 		<DisabledBigResidentialShortFormula>0</DisabledBigResidentialShortFormula>
-		<DisabledBigCommercialShortFormula>IIF(Гостевых_мм_шт+Временных_мм_шт&lt;101,Временных_мм_шт/20,IIF(Гостевых_мм_шт+Временных_мм_шт&lt;201,(Временных_мм_шт-100)*3/100+5,IIF(Гостевых_мм_шт+Временных_мм_шт&lt;501,8+(Временных_мм_шт-200)/50,14+(Временных_мм_шт-500)/100)))</DisabledBigCommercialShortFormula>
+		<DisabledBigCommercialShortFormula>IIF(Временных_мм_шт&lt;101,Временных_мм_шт/20,IIF(Временных_мм_шт&lt;201,(Временных_мм_шт-100)*3/100+5,IIF(Временных_мм_шт&lt;501,8+(Временных_мм_шт-200)/50,14+(Временных_мм_шт-500)/100)))</DisabledBigCommercialShortFormula>
 		<ElecticResidentialLongFormula>0</ElecticResidentialLongFormula>
 		<ElecticResidentialShortFormula>0</ElecticResidentialShortFormula>
 		<ElecticCommercialShortFormula>0</ElecticCommercialShortFormula>

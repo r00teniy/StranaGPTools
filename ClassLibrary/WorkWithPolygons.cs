@@ -9,7 +9,7 @@ using ClassLibrary.Models;
 namespace ClassLibrary;
 internal class WorkWithPolygons
 {
-    public double tolerance = 0.01;
+    public double tolerance = Tolerance.Global.EqualPoint;
     public MPolygon CreateMPolygonFromPolylines(List<Polyline> polylines)
     {
         var mPolygon = new MPolygon();
